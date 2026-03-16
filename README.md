@@ -42,29 +42,26 @@ If a malicious actor hosts a mirror server and tries to secretly add a hacker to
 **Requirements**
 - Node.js installed
 
-*If the CLI is published to npm, you can use `npx @open-agent-trust/cli ...`.*
-*Before publication (or for local development), run the CLI from the `cli/` directory:*
+You can run the global CLI directly via `npx` without installing it:
 
 ```bash
-# General format for local execution
-$ npm run start -- [command] [options]
-
 # 1. Generate an Ed25519 keypair for your runtime
-$ npm run start -- keygen --issuer-id my-runtime
+$ npx @open-agent-trust/cli keygen --issuer-id my-runtime
 ```
 
 **For Runtime Operators (Registering)**
 1. Generate your keypair using the CLI command above.
 2. Scaffold your registration JSON file:
-   `$ npm run start -- register --issuer-id my-runtime --display-name "My Agent" --website https://my.com --contact sec@my.com --public-key <KEY>`
+   `$ npx @open-agent-trust/cli register --issuer-id my-runtime --display-name "My Agent" --website https://my.com --contact sec@my.com --public-key <KEY>`
 3. Submit a Pull Request adding your generated `my-runtime.json` file to the `registry/issuers/` directory.
 
 **For Services (Verifying)**
 1. You can easily test your integration by issuing a test attestation:
-   `$ npm run start -- issue --issuer-id my-runtime --kid <KID> --private-key private.key --audience https://my.service.com`
-2. You can then test verifying that attestation against your local node directly:
-   `$ npm run start -- verify <JWT_STRING> --audience https://my.service.com`
-3. Wait for the upcoming TS/Swift SDK releases to easily ingest attestations into your own codebase.
+   `$ npx @open-agent-trust/cli issue --issuer-id my-runtime --kid <KID> --private-key private.key --audience https://my.service.com`
+2. You can then test verifying that attestation against the registry:
+   `$ npx @open-agent-trust/cli verify <JWT_STRING> --audience https://my.service.com`
+3. Integrating directly into your TypeScript application:
+   `$ npm install @open-agent-trust/registry`
 
 ## Relationship to `agent.json`
 

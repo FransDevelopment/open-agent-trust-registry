@@ -10,3 +10,4 @@ build/
 *.xcworkspace
 xcuserdata/
 .swiftpm/
+*.key
