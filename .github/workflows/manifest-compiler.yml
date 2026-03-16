@@ -1,0 +1,51 @@
+name: Registry Compiler
+
+on:
+  schedule:
+    # Runs every 50 minutes to comfortably beat the 60-minute expiration
+    - cron: '*/50 * * * *'
+  # Allows manual triggers from the GitHub Actions tab
+  workflow_dispatch:
+  # Runs whenever a new issuer JSON is merged into the default branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'registry/issuers/**.json'
+
+permissions:
+  contents: write
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CLI Dependencies
+        working-directory: ./cli
+        run: npm ci
+
+      - name: Compile Master Manifest
+        working-directory: ./cli
+        env:
+          SIGNING_KEY: ${{ secrets.ROOT_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SIGNING_KEY" ]; then
+            echo "Error: ROOT_PRIVATE_KEY secret is not set!"
+            exit 1
+          fi
+          npm run start -- compile --private-key "$SIGNING_KEY"
+
+      - name: Commit and Push Updated Manifest
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-compile latest manifest.json [skip ci]"
+          file_pattern: "registry/manifest.json"
