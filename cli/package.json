@@ -1,0 +1,30 @@
+{
+  "name": "@open-agent-trust/cli",
+  "version": "1.0.0",
+  "description": "CLI utilities for the Open Agent Trust Registry",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/open-agent-trust/open-agent-trust-registry.git"
+  },
+  "author": "Open Agent Trust Registry Contributors",
+  "bin": {
+    "agent-trust": "./dist/index.js",
+    "open-agent-trust": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^3.0.0",
+    "@open-agent-trust/registry": "file:../sdk/typescript",
+    "commander": "^12.1.0",
+    "jose": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

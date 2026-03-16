@@ -1,0 +1,25 @@
+{
+  "name": "@open-agent-trust/server",
+  "version": "1.0.0",
+  "description": "A reference caching mirror server for the Open Agent Trust Registry.",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/open-agent-trust/open-agent-trust-registry.git"
+  },
+  "author": "Open Agent Trust Registry Contributors",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@open-agent-trust/registry": "file:../sdk/typescript",
+    "hono": "^4.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

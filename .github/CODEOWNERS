@@ -1,0 +1,20 @@
+# This CODEOWNERS file enforces review requirements for 
+# changes to the Open Trust Registry state.
+
+# Global default
+*       @founding-maintainer-1 @founding-maintainer-2
+
+# The actual registry entries
+# Any addition, deletion, or key rotation requires at least 
+# 1 approval from the core maintaining group PLUS 
+# 1 approval from the independent review council.
+/registry/issuers/*.json @review-council @founding-maintainers
+
+# The revocation list
+# Same high-bar requirement for revocations to prevent abuse
+/registry/revocations.json @review-council @founding-maintainers
+
+# The Manifest
+# This file is generated via the signing ceremony. Modifying it directly 
+# requires unanimous maintainer consent to coordinate the 3-of-5 threshold.
+/registry/manifest.json @founding-maintainers

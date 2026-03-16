@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-03-15T12:00:00Z",
+  "expires_at": "2026-03-16T12:00:00Z",
+  "_comment": "Revocation list is unsigned during bootstrap. Will be signed once root key ceremony is complete.",
+  "revoked_keys": [],
+  "revoked_issuers": [],
+  "signature": null
+}
