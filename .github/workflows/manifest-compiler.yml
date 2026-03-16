@@ -29,6 +29,12 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Build SDK Dependency
+        working-directory: ./sdk/typescript
+        run: |
+          npm ci
+          npm run build
+
       - name: Install CLI Dependencies
         working-directory: ./cli
         run: npm ci
