@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-20T03:40:45.286Z",
-  "expires_at": "2026-03-20T04:40:45.286Z",
+  "generated_at": "2026-03-20T04:27:19.186Z",
+  "expires_at": "2026-03-20T05:27:19.186Z",
   "total_issuers": 1,
   "issuers": {
     "arcede": {
@@ -33,5 +33,5 @@
       }
     }
   },
-  "signature": "ed25519:xixojdd46KsRMO1it_XrMKJIGp9RAJ4GHAWYuvLEWPN8YazLyqDW4bSeQVPtEh0KBTpAsOZy0YMSgyEAxDbwDA"
+  "signature": "ed25519:YxjZONi-f3_cHU72BQlUZzRQdr7i9SlBag2VWc2_EzY1ojaQ7XkSXNef07CNZnj2A9U9OWevSspjmcyVq31fDQ"
 }
