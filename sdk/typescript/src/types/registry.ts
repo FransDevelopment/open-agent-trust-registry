@@ -21,6 +21,18 @@ export interface IssuerCapabilities {
   immutable_audit: boolean;
   attestation_format: string;
   max_attestation_ttl_seconds: number;
+  /**
+   * Whether community auditors have independently verified this issuer's
+   * capability claims. New issuers are automatically included with
+   * `capabilities_verified: false` (Tier 1 registration). Community
+   * reviewers may upgrade to `true` via a separate PR (Tier 2).
+   *
+   * Services may use this field to apply differentiated policies, e.g.
+   * requiring `capabilities_verified: true` for high-stakes operations.
+   *
+   * @see https://github.com/FransDevelopment/open-agent-trust-registry/blob/main/GOVERNANCE.md#tier-2-capability-verification-community-review
+   */
+  capabilities_verified: boolean;
 }
 
 export interface IssuerEndpoints {

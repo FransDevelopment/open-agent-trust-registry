@@ -49,7 +49,8 @@ Each entry models one trusted attestation issuer.
     "audit_logging": true,
     "immutable_audit": true,
     "attestation_format": "jwt",
-    "max_attestation_ttl_seconds": 3600
+    "max_attestation_ttl_seconds": 3600,
+    "capabilities_verified": false
   },
   "endpoints": {
     "attestation_verify": "https://api.acme.example.com/v1/identity/verify",
@@ -68,8 +69,19 @@ Each entry models one trusted attestation issuer.
 | `added_at` | ISO 8601 | yes | When issuer was added to registry |
 | `last_verified` | ISO 8601 | yes | Last time issuer passed verification check |
 | `public_keys` | array | yes | Array of `PublicKey` objects (at least one active) |
-| `capabilities` | object | yes | Self-declared capabilities of the runtime |
+| `capabilities` | object | yes | Self-declared capabilities of the runtime (see Capabilities sub-fields below) |
 | `endpoints` | object | no | Optional verification/revocation endpoints |
+
+### 2.1 Capabilities Sub-fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `supervision_model` | string | Human oversight model (e.g. `"tiered"`, `"full"`, `"autonomous"`) |
+| `audit_logging` | boolean | Whether the runtime maintains audit logs of agent actions |
+| `immutable_audit` | boolean | Whether the audit log is write-once / tamper-evident |
+| `attestation_format` | string | Token format produced by the runtime (e.g. `"jwt"`) |
+| `max_attestation_ttl_seconds` | integer | Maximum lifetime of any issued attestation, in seconds |
+| `capabilities_verified` | boolean | `false` for all new registrations (automated Tier 1). Community auditors may open a PR setting this to `true` (Tier 2 review) after independently verifying the above claims. Services may use this flag to apply differentiated trust policies (see [Governance Tier 2](../GOVERNANCE.md)). |
 
 ## 3. Public Key Entry
 

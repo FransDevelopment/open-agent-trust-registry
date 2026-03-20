@@ -41,7 +41,8 @@ export const register = async (options: RegisterOptions) => {
             "audit_logging": true,
             "immutable_audit": false,
             "attestation_format": "jwt",
-            "max_attestation_ttl_seconds": 3600
+            "max_attestation_ttl_seconds": 3600,
+            "capabilities_verified": false
         }
     };
 
