@@ -45,6 +45,11 @@ public struct IssuerCapabilities: Codable {
     public let immutableAudit: Bool
     public let attestationFormat: String
     public let maxAttestationTtlSeconds: Int
+    /// `false` for all new registrations (Tier 1 automated inclusion).
+    /// Set to `true` by community auditors after independently verifying the
+    /// capability claims above (Tier 2 review). Services may gate high-stakes
+    /// operations on this flag. See GOVERNANCE.md for the review process.
+    public let capabilitiesVerified: Bool
 
     enum CodingKeys: String, CodingKey {
         case supervisionModel = "supervision_model"
@@ -52,6 +57,7 @@ public struct IssuerCapabilities: Codable {
         case immutableAudit = "immutable_audit"
         case attestationFormat = "attestation_format"
         case maxAttestationTtlSeconds = "max_attestation_ttl_seconds"
+        case capabilitiesVerified = "capabilities_verified"
     }
 }
 

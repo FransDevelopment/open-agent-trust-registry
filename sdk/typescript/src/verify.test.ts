@@ -38,7 +38,7 @@ describe('OpenAgentTrustRegistry (Client)', () => {
           status: "active",
           added_at: new Date().toISOString(),
           last_verified: new Date().toISOString(),
-          capabilities: { supervision_model: 'none', audit_logging: false, immutable_audit: false, attestation_format: 'jwt', max_attestation_ttl_seconds: 3600 },
+          capabilities: { supervision_model: 'none', audit_logging: false, immutable_audit: false, attestation_format: 'jwt', max_attestation_ttl_seconds: 3600, capabilities_verified: false },
           public_keys: [
             {
               kid: "valid-key-1",
@@ -70,7 +70,7 @@ describe('OpenAgentTrustRegistry (Client)', () => {
            status: "revoked",
            added_at: new Date().toISOString(),
            last_verified: new Date().toISOString(),
-           capabilities: { supervision_model: 'none', audit_logging: false, immutable_audit: false, attestation_format: 'jwt', max_attestation_ttl_seconds: 3600 },
+           capabilities: { supervision_model: 'none', audit_logging: false, immutable_audit: false, attestation_format: 'jwt', max_attestation_ttl_seconds: 3600, capabilities_verified: false },
            public_keys: [
              {
                kid: "revoked-key-1",

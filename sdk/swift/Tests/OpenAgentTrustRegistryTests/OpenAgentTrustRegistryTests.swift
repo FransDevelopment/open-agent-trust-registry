@@ -62,7 +62,8 @@ final class AgentTrustRegistryTests: XCTestCase {
             auditLogging: false,
             immutableAudit: false,
             attestationFormat: "jwt",
-            maxAttestationTtlSeconds: 3600
+            maxAttestationTtlSeconds: 3600,
+            capabilitiesVerified: false
         )
 
         let validIssuer = IssuerEntry(
