@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-20T10:04:40.276Z",
-  "expires_at": "2026-03-20T11:04:40.276Z",
+  "generated_at": "2026-03-20T10:29:25.799Z",
+  "expires_at": "2026-03-20T11:29:25.799Z",
   "total_issuers": 1,
   "issuers": {
     "arcede": {
@@ -29,9 +29,10 @@
         "audit_logging": true,
         "immutable_audit": false,
         "attestation_format": "jwt",
-        "max_attestation_ttl_seconds": 3600
+        "max_attestation_ttl_seconds": 3600,
+        "capabilities_verified": false
       }
     }
   },
-  "signature": "ed25519:pnUtRl693-_A3eKP33EWU1yEzAC7awhSMC50ica2QxHMdastD96ivyclegjfSy2mH8sNo64588wqGNINVpIqBg"
+  "signature": "ed25519:RhpEqT1zFC4tG_2QhIKONGo7JNDAc5hgd6kGwvWPRGN5tGIpT52WvUrCPsag2DnOXqqeRXYMztLpDcvexp87CA"
 }
