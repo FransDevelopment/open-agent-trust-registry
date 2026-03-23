@@ -1,6 +1,6 @@
 {
   "name": "@open-agent-trust/cli",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "CLI utilities for the Open Agent Trust Registry",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@noble/ed25519": "^3.0.0",
-    "@open-agent-trust/registry": "file:../sdk/typescript",
+    "@open-agent-trust/registry": "^1.0.0",
     "commander": "^12.1.0",
     "jose": "^6.2.1"
   },

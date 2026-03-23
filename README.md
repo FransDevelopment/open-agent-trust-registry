@@ -39,29 +39,86 @@ If a malicious actor hosts a mirror server and tries to secretly add a hacker to
 
 ## Quickstart
 
-**Requirements**
-- Node.js installed
+**Requirements:** Node.js 18+
 
-You can run the global CLI directly via `npx` without installing it:
+### 1. Generate a keypair
 
 ```bash
-# 1. Generate an Ed25519 keypair for your runtime
-$ npx @open-agent-trust/cli keygen --issuer-id my-runtime
+npx @open-agent-trust/cli keygen --issuer-id my-runtime
 ```
 
-**For Runtime Operators (Registering)**
-1. Generate your keypair using the CLI command above.
-2. Scaffold your registration JSON file:
-   `$ npx @open-agent-trust/cli register --issuer-id my-runtime --display-name "My Agent" --website https://my.com --contact sec@my.com --public-key <KEY>`
-3. Submit a Pull Request adding your generated `my-runtime.json` file to the `registry/issuers/` directory.
+This creates:
+- A **private key** file (`my-runtime.private.pem`) — keep this secret, never commit it
+- A **public key** printed to your terminal — used for registration and verification
 
-**For Services (Verifying)**
-1. You can easily test your integration by issuing a test attestation:
-   `$ npx @open-agent-trust/cli issue --issuer-id my-runtime --kid <KID> --private-key private.key --audience https://my.service.com`
-2. You can then test verifying that attestation against the registry:
-   `$ npx @open-agent-trust/cli verify <JWT_STRING> --audience https://my.service.com`
-3. Integrating directly into your TypeScript application:
-   `$ npm install @open-agent-trust/registry`
+To read your private key later: `cat my-runtime.private.pem`
+
+> **macOS users:** Do not double-click `.private.pem` files. macOS will try to import them into Keychain Access, which is not what you want. Always use `cat` in the terminal.
+
+### 2. Register as a trusted runtime
+
+Create your registration file and submit a Pull Request:
+
+```bash
+npx @open-agent-trust/cli register \
+  --issuer-id my-runtime \
+  --display-name "My Agent Runtime" \
+  --website https://my-runtime.com \
+  --contact security@my-runtime.com \
+  --public-key <PUBLIC_KEY_FROM_STEP_1>
+```
+
+This generates a `my-runtime.json` file. Submit a PR adding it to `registry/issuers/`.
+
+### 3. Issue and verify attestations
+
+Once registered, your runtime can sign attestations (JWTs) to vouch for agents it runs:
+
+```bash
+# Issue a test attestation
+npx @open-agent-trust/cli issue \
+  --issuer-id my-runtime \
+  --kid <KID_FROM_STEP_1> \
+  --private-key my-runtime.private.pem \
+  --audience https://target-api.com
+
+# Verify an attestation against the registry
+npx @open-agent-trust/cli verify <JWT_STRING> --audience https://target-api.com
+```
+
+### 4. Integrate into your application
+
+```bash
+npm install @open-agent-trust/registry
+```
+
+```typescript
+import { OpenAgentTrustRegistry } from '@open-agent-trust/registry';
+
+const registry = new OpenAgentTrustRegistry();
+const result = await registry.verifyAttestation(jwt, {
+  audience: 'https://your-api.com'
+});
+```
+
+### Understanding the roles
+
+| Role | What it means | Example |
+|------|--------------|---------|
+| **Runtime Operator** | Runs agents on behalf of users. Registers in the Trust Registry so APIs can verify its agents are legitimate. | Agent Internet Runtime, LangChain Cloud |
+| **API Provider** | Accepts requests from agents. Verifies attestations to ensure the requesting agent is authorized. | Stripe, OpenAI, any paid API |
+| **Agent** | Acts on behalf of a user. Carries an attestation signed by its runtime to prove its identity. | A shopping assistant, a code reviewer |
+
+### How signing works
+
+When your runtime sends an agent to call a third-party API:
+
+1. Your backend signs a JWT using the private key from Step 1
+2. The JWT says: "I am [your runtime], and this agent is authorized to act for user X"
+3. The target API receives the JWT, looks up your public key in the Trust Registry, and verifies the signature
+4. If valid, the API trusts the request
+
+This happens automatically in your server code. The private key never leaves your infrastructure.
 
 ## Relationship to `agent.json`
 
