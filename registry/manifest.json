@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-23T20:03:38.594Z",
-  "expires_at": "2026-03-23T21:03:38.595Z",
-  "total_issuers": 2,
+  "generated_at": "2026-03-23T20:11:12.387Z",
+  "expires_at": "2026-03-23T21:11:12.387Z",
+  "total_issuers": 3,
   "issuers": {
     "agentinternetruntime": {
       "issuer_id": "agentinternetruntime",
@@ -61,7 +61,36 @@
         "max_attestation_ttl_seconds": 3600,
         "capabilities_verified": false
       }
+    },
+    "qntm": {
+      "issuer_id": "qntm",
+      "display_name": "qntm",
+      "website": "https://inbox.qntm.corpo.llc",
+      "security_contact": "security@corpo.llc",
+      "status": "active",
+      "added_at": "2026-03-23T19:40:00.000Z",
+      "last_verified": "2026-03-23T19:40:00.000Z",
+      "public_keys": [
+        {
+          "kid": "qntm-relay-2026-03",
+          "algorithm": "Ed25519",
+          "public_key": "irD_bAvvt_KuQXaKAebRJBcp3SFFycDb2mEaxBCEC8k",
+          "status": "active",
+          "issued_at": "2026-03-23T19:40:00.000Z",
+          "expires_at": "2027-03-23T19:40:00.000Z",
+          "deprecated_at": null,
+          "revoked_at": null
+        }
+      ],
+      "capabilities": {
+        "supervision_model": "none",
+        "audit_logging": true,
+        "immutable_audit": false,
+        "attestation_format": "qsp1",
+        "max_attestation_ttl_seconds": 604800,
+        "capabilities_verified": false
+      }
     }
   },
-  "signature": "ed25519:bMpJbcINkYJcPfjlotdhEn0wSQWmWjpwXaqCzSIX5Ri6aqZZCfV-lUWwJonrb7vKvftjVJlKGuYX6ox15z9tCA"
+  "signature": "ed25519:fHpA6nUxxZOx7tMOhe2G_AiFxOHipak2R8qFoqcKeeYioajv9rvmxoGv6_E6Q15afRNAbb-lvrVDLKaMCID_Bw"
 }
