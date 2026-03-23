@@ -1,7 +1,12 @@
 name: Verify Registration
 
+# Use pull_request_target so the workflow has write permissions for fork PRs.
+# SECURITY: The workflow code always runs from the base branch (main), not the
+# PR branch. We only checkout the PR's registry/ files for verification.
+# The file-scope check (Step 0) rejects PRs that touch anything outside
+# registry/issuers/ and registry/proofs/, preventing code injection.
 on:
-  pull_request:
+  pull_request_target:
     paths:
       - 'registry/issuers/**.json'
       - 'registry/proofs/**.proof'
@@ -18,9 +23,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the PR head — needed to read the issuer JSON and proof files.
+      # The workflow YAML itself is from the base branch (pull_request_target
+      # guarantees this), so the PR cannot modify the verification logic.
       - name: Checkout PR
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -362,13 +371,18 @@ jobs:
               body += `\n🛠️ Generate a proof with:\n\`\`\`bash\nnpx @open-agent-trust/cli prove --issuer-id <YOUR_ID> --private-key <PATH>\n\`\`\`\n`;
             }
 
-            // Post comment
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: body
-            });
+            // Post comment — wrapped in try/catch so a permissions failure
+            // doesn't prevent the auto-merge step from running
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: body
+              });
+            } catch (commentErr) {
+              core.warning(`Could not post PR comment: ${commentErr.message}. Verification results are in the workflow log above.`);
+            }
 
             // Set output for auto-merge decision
             core.setOutput('all_passed', allPassed.toString());
