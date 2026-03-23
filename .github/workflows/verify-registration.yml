@@ -1,0 +1,370 @@
+name: Verify Registration
+
+on:
+  pull_request:
+    paths:
+      - 'registry/issuers/**.json'
+      - 'registry/proofs/**.proof'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # ── Step 0: File-scope security check ──────────────────────────
+      # Reject auto-merge if the PR touches anything outside the
+      # allowed registration paths. This prevents an attacker from
+      # bundling workflow modifications into a "registration" PR.
+      - name: Enforce file-scope restrictions
+        id: scope
+        run: |
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          ALLOWED=true
+          for file in $CHANGED_FILES; do
+            case "$file" in
+              registry/issuers/*.json|registry/proofs/*.proof) ;;
+              *)
+                echo "::error::PR modifies disallowed file: $file"
+                echo "::error::Auto-merge is only permitted for PRs that exclusively add issuer entries and proofs."
+                ALLOWED=false
+                ;;
+            esac
+          done
+
+          echo "allowed=$ALLOWED" >> "$GITHUB_OUTPUT"
+          if [ "$ALLOWED" != "true" ]; then
+            echo "::warning::File-scope check failed. This PR will not be auto-merged but verification will still run."
+          fi
+
+      # ── Step 1: Detect new/changed issuer files ────────────────────
+      - name: Detect issuer files
+        id: detect
+        run: |
+          ISSUER_FILES=$(git diff --name-only --diff-filter=AM origin/main...HEAD -- 'registry/issuers/*.json' | tr '\n' ' ')
+          echo "issuer_files=$ISSUER_FILES" >> "$GITHUB_OUTPUT"
+          if [ -z "$ISSUER_FILES" ]; then
+            echo "::notice::No new or modified issuer files detected."
+          else
+            echo "Issuer files to verify: $ISSUER_FILES"
+          fi
+
+      # ── Step 2: Install verification dependency ────────────────────
+      - name: Install @noble/ed25519
+        if: steps.detect.outputs.issuer_files != ''
+        run: npm install @noble/ed25519@3.0.0
+
+      # ── Step 3: Schema + Proof + Domain verification ───────────────
+      - name: Verify registration
+        if: steps.detect.outputs.issuer_files != ''
+        id: verify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const ed = require('@noble/ed25519');
+
+            const PROOF_VERSION = 'oatr-proof-v1';
+            const ISSUER_ID_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
+            const REQUIRED_FIELDS = [
+              'issuer_id', 'display_name', 'website', 'security_contact',
+              'status', 'added_at', 'last_verified', 'public_keys', 'capabilities'
+            ];
+
+            const issuerFiles = '${{ steps.detect.outputs.issuer_files }}'.trim().split(/\s+/).filter(Boolean);
+            const results = [];
+            let allPassed = true;
+
+            for (const file of issuerFiles) {
+              const issuerId = path.basename(file, '.json');
+              const result = { issuerId, schema: false, proof: false, domain: false, errors: [] };
+
+              try {
+                // ── Schema Validation ──
+                const raw = fs.readFileSync(file, 'utf8');
+                let issuer;
+                try {
+                  issuer = JSON.parse(raw);
+                } catch (e) {
+                  result.errors.push(`Invalid JSON: ${e.message}`);
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                // Required fields
+                for (const field of REQUIRED_FIELDS) {
+                  if (!(field in issuer)) {
+                    result.errors.push(`Missing required field: ${field}`);
+                  }
+                }
+
+                // issuer_id must match filename
+                if (issuer.issuer_id !== issuerId) {
+                  result.errors.push(`issuer_id "${issuer.issuer_id}" does not match filename "${issuerId}.json"`);
+                }
+
+                // issuer_id format
+                if (!ISSUER_ID_PATTERN.test(issuer.issuer_id || '')) {
+                  result.errors.push(`issuer_id must be lowercase alphanumeric and hyphens only`);
+                }
+
+                // At least one active Ed25519 key
+                const activeKeys = (issuer.public_keys || []).filter(
+                  k => k.status === 'active' && k.algorithm === 'Ed25519'
+                );
+                if (activeKeys.length === 0) {
+                  result.errors.push('No active Ed25519 key found in public_keys');
+                }
+
+                // Validate public key is 32 bytes
+                for (const key of activeKeys) {
+                  try {
+                    const decoded = Buffer.from(key.public_key, 'base64url');
+                    if (decoded.length !== 32) {
+                      result.errors.push(`Public key "${key.kid}" decodes to ${decoded.length} bytes, expected 32`);
+                    }
+                  } catch (e) {
+                    result.errors.push(`Public key "${key.kid}" is not valid base64url`);
+                  }
+                }
+
+                if (result.errors.length > 0) {
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+                result.schema = true;
+
+                // ── Proof-of-Key-Ownership ──
+                const proofPath = `registry/proofs/${issuerId}.proof`;
+                if (!fs.existsSync(proofPath)) {
+                  result.errors.push(`Proof file not found at ${proofPath}. Generate one with: npx @open-agent-trust/cli prove --issuer-id ${issuerId} --private-key <path>`);
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                const proofContent = fs.readFileSync(proofPath, 'utf8');
+
+                // Validate delimiters
+                if (!proofContent.includes('-----BEGIN OATR KEY OWNERSHIP PROOF-----') ||
+                    !proofContent.includes('-----END OATR KEY OWNERSHIP PROOF-----')) {
+                  result.errors.push('Proof file missing BEGIN/END delimiters');
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                // Extract fields
+                const sigMatch = proofContent.match(/^Signature:\s*(.+?)\s*$/m);
+                const msgMatch = proofContent.match(/^Canonical-Message:\s*(.+?)\s*$/m);
+
+                if (!sigMatch) {
+                  result.errors.push('Proof file missing Signature field');
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+                if (!msgMatch) {
+                  result.errors.push('Proof file missing Canonical-Message field');
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                // Verify canonical message matches expected format
+                const expectedMessage = `${PROOF_VERSION}:${issuerId}`;
+                if (msgMatch[1] !== expectedMessage) {
+                  result.errors.push(`Canonical-Message mismatch: expected "${expectedMessage}", got "${msgMatch[1]}"`);
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                // Verify signature against each active key
+                const signatureB64 = sigMatch[1];
+                let signatureBytes;
+                try {
+                  signatureBytes = Buffer.from(signatureB64, 'base64url');
+                } catch (e) {
+                  result.errors.push('Signature is not valid base64url');
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                const messageBytes = Buffer.from(expectedMessage, 'utf8');
+                let proofValid = false;
+
+                for (const key of activeKeys) {
+                  const publicKeyBytes = Buffer.from(key.public_key, 'base64url');
+                  try {
+                    const valid = await ed.verifyAsync(signatureBytes, messageBytes, publicKeyBytes);
+                    if (valid) {
+                      proofValid = true;
+                      core.info(`Proof verified against key: ${key.kid}`);
+                      break;
+                    }
+                  } catch (e) {
+                    core.warning(`Signature check failed for key ${key.kid}: ${e.message}`);
+                  }
+                }
+
+                if (!proofValid) {
+                  result.errors.push('Proof signature does not verify against any active Ed25519 key in the registration');
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+                result.proof = true;
+
+                // ── Domain Verification ──
+                const website = issuer.website.replace(/\/+$/, '');
+                const verificationUrl = `${website}/.well-known/agent-trust.json`;
+
+                let domainData;
+                try {
+                  const controller = new AbortController();
+                  const timeout = setTimeout(() => controller.abort(), 10000);
+                  const response = await fetch(verificationUrl, {
+                    signal: controller.signal,
+                    headers: { 'User-Agent': 'OATR-CI-Verification/1.0' }
+                  });
+                  clearTimeout(timeout);
+
+                  if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+                  }
+                  domainData = await response.json();
+                } catch (e) {
+                  // Retry once
+                  try {
+                    core.info(`Domain verification failed, retrying: ${e.message}`);
+                    await new Promise(r => setTimeout(r, 2000));
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 10000);
+                    const response = await fetch(verificationUrl, {
+                      signal: controller.signal,
+                      headers: { 'User-Agent': 'OATR-CI-Verification/1.0' }
+                    });
+                    clearTimeout(timeout);
+
+                    if (!response.ok) {
+                      throw new Error(`HTTP ${response.status} ${response.statusText}`);
+                    }
+                    domainData = await response.json();
+                  } catch (retryErr) {
+                    result.errors.push(`Domain verification failed: could not fetch ${verificationUrl} — ${retryErr.message}`);
+                    results.push(result);
+                    allPassed = false;
+                    continue;
+                  }
+                }
+
+                // Verify issuer_id matches
+                if (domainData.issuer_id !== issuerId) {
+                  result.errors.push(`Domain issuer_id mismatch: expected "${issuerId}", got "${domainData.issuer_id}"`);
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                // Verify public_key_fingerprint matches kid
+                const expectedKid = activeKeys[0].kid;
+                if (domainData.public_key_fingerprint !== expectedKid) {
+                  result.errors.push(`Domain public_key_fingerprint mismatch: expected "${expectedKid}", got "${domainData.public_key_fingerprint}"`);
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
+                result.domain = true;
+
+              } catch (e) {
+                result.errors.push(`Unexpected error: ${e.message}`);
+                allPassed = false;
+              }
+
+              results.push(result);
+            }
+
+            // ── Report results ──
+            let body = '## 🔐 Registration Verification Results\n\n';
+            for (const r of results) {
+              const status = (r.schema && r.proof && r.domain) ? '✅' : '❌';
+              body += `### ${status} \`${r.issuerId}\`\n\n`;
+              body += `| Check | Status |\n|-------|--------|\n`;
+              body += `| Schema validation | ${r.schema ? '✅ Pass' : '❌ Fail'} |\n`;
+              body += `| Proof-of-key-ownership | ${r.proof ? '✅ Pass' : '❌ Fail'} |\n`;
+              body += `| Domain verification | ${r.domain ? '✅ Pass' : '❌ Fail'} |\n\n`;
+              if (r.errors.length > 0) {
+                body += `**Errors:**\n`;
+                for (const err of r.errors) {
+                  body += `- ${err}\n`;
+                }
+                body += '\n';
+              }
+            }
+
+            if (!allPassed) {
+              body += `---\n\n📖 See [spec 11 — Proof of Key Ownership](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/spec/11-proof-of-key-ownership.md) for the proof format.\n`;
+              body += `\n🛠️ Generate a proof with:\n\`\`\`bash\nnpx @open-agent-trust/cli prove --issuer-id <YOUR_ID> --private-key <PATH>\n\`\`\`\n`;
+            }
+
+            // Post comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: body
+            });
+
+            // Set output for auto-merge decision
+            core.setOutput('all_passed', allPassed.toString());
+            core.setOutput('scope_allowed', '${{ steps.scope.outputs.allowed }}');
+
+            if (!allPassed) {
+              core.setFailed('One or more verification checks failed.');
+            }
+
+      # ── Step 4: Auto-merge if all checks pass ─────────────────────
+      - name: Auto-merge registration
+        if: |
+          steps.verify.outputs.all_passed == 'true' &&
+          steps.scope.outputs.allowed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.info('All verification checks passed. Auto-merging...');
+
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              merge_method: 'squash',
+              commit_title: `Register issuer via automated verification [auto-merge]`,
+              commit_message: `Automated merge after passing all three Tier 1 checks:\n- Schema validation ✅\n- Proof-of-key-ownership ✅\n- Domain verification ✅\n\nSee spec/11-proof-of-key-ownership.md for verification protocol.`
+            });
+
+            core.info('PR merged successfully.');
