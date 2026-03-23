@@ -1,0 +1,29 @@
+{
+  "issuer_id": "arkforge",
+  "display_name": "ArkForge",
+  "website": "https://arkforge.tech",
+  "security_contact": "contact@arkforge.fr",
+  "status": "active",
+  "added_at": "2026-03-23T20:00:00.000Z",
+  "last_verified": "2026-03-23T20:00:00.000Z",
+  "public_keys": [
+    {
+      "kid": "arkforge-2026-03",
+      "algorithm": "Ed25519",
+      "public_key": "ZLlGE0eN0eTNUE9vaK1tStf6AuoFUWqJBvqx7QgxfEY",
+      "status": "active",
+      "issued_at": "2026-03-23T20:00:00.000Z",
+      "expires_at": "2027-03-23T20:00:00.000Z",
+      "deprecated_at": null,
+      "revoked_at": null
+    }
+  ],
+  "capabilities": {
+    "supervision_model": "tiered",
+    "audit_logging": true,
+    "immutable_audit": true,
+    "attestation_format": "json",
+    "max_attestation_ttl_seconds": 0,
+    "capabilities_verified": false
+  }
+}
