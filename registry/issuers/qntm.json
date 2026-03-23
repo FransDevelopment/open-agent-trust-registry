@@ -1,0 +1,29 @@
+{
+  "issuer_id": "qntm",
+  "display_name": "qntm",
+  "website": "https://inbox.qntm.corpo.llc",
+  "security_contact": "security@corpo.llc",
+  "status": "active",
+  "added_at": "2026-03-23T19:40:00.000Z",
+  "last_verified": "2026-03-23T19:40:00.000Z",
+  "public_keys": [
+    {
+      "kid": "qntm-relay-2026-03",
+      "algorithm": "Ed25519",
+      "public_key": "irD_bAvvt_KuQXaKAebRJBcp3SFFycDb2mEaxBCEC8k",
+      "status": "active",
+      "issued_at": "2026-03-23T19:40:00.000Z",
+      "expires_at": "2027-03-23T19:40:00.000Z",
+      "deprecated_at": null,
+      "revoked_at": null
+    }
+  ],
+  "capabilities": {
+    "supervision_model": "none",
+    "audit_logging": true,
+    "immutable_audit": false,
+    "attestation_format": "qsp1",
+    "max_attestation_ttl_seconds": 604800,
+    "capabilities_verified": false
+  }
+}
