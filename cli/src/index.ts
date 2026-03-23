@@ -5,6 +5,7 @@ import { register } from './commands/register';
 import { verify } from './commands/verify';
 import { issue } from './commands/issue';
 import { compile } from './commands/compile';
+import { prove } from './commands/prove';
 
 const program = new Command();
 
@@ -55,5 +56,13 @@ program
   .description('Compiles and signs the final manifest.json from the registry folder')
   .requiredOption('-p, --private-key <key>', 'Ed25519 private key to sign the manifest')
   .action(compile);
+
+program
+  .command('prove')
+  .description('Generate a cryptographic proof-of-key-ownership for registry registration')
+  .requiredOption('-i, --issuer-id <string>', 'Your globally unique issuer identifier')
+  .requiredOption('-p, --private-key <path>', 'Path to your .private.pem key file')
+  .option('-o, --out-file <path>', 'Output path for the proof file')
+  .action(prove);
 
 program.parse(process.argv);

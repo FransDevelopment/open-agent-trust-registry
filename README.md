@@ -55,9 +55,7 @@ To read your private key later: `cat my-runtime.private.pem`
 
 > **macOS users:** Do not double-click `.private.pem` files. macOS will try to import them into Keychain Access, which is not what you want. Always use `cat` in the terminal.
 
-### 2. Register as a trusted runtime
-
-Create your registration file and submit a Pull Request:
+### 2. Create your registration file
 
 ```bash
 npx @open-agent-trust/cli register \
@@ -68,9 +66,42 @@ npx @open-agent-trust/cli register \
   --public-key <PUBLIC_KEY_FROM_STEP_1>
 ```
 
-This generates a `my-runtime.json` file. Submit a PR adding it to `registry/issuers/`.
+This generates a `my-runtime.json` file. Review the `capabilities` block to match your runtime's actual profile before submitting.
 
-### 3. Issue and verify attestations
+### 3. Host your domain verification file
+
+Host a `/.well-known/agent-trust.json` file at the website you declared in Step 2. This proves you control the domain — the same model used by Let's Encrypt and DNS-based domain verification.
+
+**At `https://my-runtime.com/.well-known/agent-trust.json`:**
+
+```json
+{
+  "issuer_id": "my-runtime",
+  "public_key_fingerprint": "my-runtime-2026-03"
+}
+```
+
+The `public_key_fingerprint` is the `kid` value printed during Step 1 (format: `{issuer-id}-{YYYY-MM}`). The CI pipeline will fetch this file and verify it matches your registration.
+
+### 4. Generate your proof of key ownership
+
+```bash
+npx @open-agent-trust/cli prove \
+  --issuer-id my-runtime \
+  --private-key my-runtime.private.pem
+```
+
+This creates `registry/proofs/my-runtime.proof` — a cryptographic proof that you control the private key matching your registration's public key. The private key is used for signing but **never appears** in the proof file. See [spec 11](spec/11-proof-of-key-ownership.md) for the format specification.
+
+### 5. Submit your Pull Request
+
+Open a PR against this repository containing exactly two files:
+- `registry/issuers/my-runtime.json` — your issuer entry from Step 2
+- `registry/proofs/my-runtime.proof` — your proof from Step 4
+
+**Automated verification (Tier 1):** The CI pipeline checks three things — valid Ed25519 key, proof-of-key-ownership signature, and domain verification. If all three pass, the PR is auto-merged. No human approval required. See [GOVERNANCE.md](GOVERNANCE.md) for the full tiered model.
+
+### 6. Issue and verify attestations
 
 Once registered, your runtime can sign attestations (JWTs) to vouch for agents it runs:
 
@@ -86,7 +117,7 @@ npx @open-agent-trust/cli issue \
 npx @open-agent-trust/cli verify <JWT_STRING> --audience https://target-api.com
 ```
 
-### 4. Integrate into your application
+### 7. Integrate into your application
 
 ```bash
 npm install @open-agent-trust/registry

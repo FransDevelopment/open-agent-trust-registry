@@ -22,14 +22,21 @@ $ npx @open-agent-trust/cli register --issuer-id my-runtime --display-name "My R
 **Step 3 — Domain Verification**
 Host a `/.well-known/agent-trust.json` file at your declared website containing your `issuer_id` and public key fingerprint. This is verified automatically by the CI pipeline — identical to how Let's Encrypt verifies domain ownership.
 
-**Step 4 — Submit a Pull Request**
-The runtime opens a pull request against the registry repository, adding their entry to `registry/issuers/{issuer_id}.json`.
+**Step 4 — Generate Proof of Key Ownership**
+Generate a cryptographic proof that you control the private key corresponding to the public key in your registration. See [spec 11 — Proof of Key Ownership](11-proof-of-key-ownership.md) for the full format specification.
 
-The PR **must** include:
-- The `issuer_entry` JSON content.
-- A cryptographic Proof-of-Key-Ownership: a signed statement (e.g., "I control this key and am registering it for {issuer_id}") signed with the private key corresponding to the submitted public key.
+```bash
+$ npx @open-agent-trust/cli prove --issuer-id my-runtime --private-key my-runtime.private.pem
+```
 
-**Step 5 — Automated Verification (Tier 1)**
+This creates `registry/proofs/my-runtime.proof` — a detached Ed25519 signature over a versioned canonical message. The private key is used for signing but never appears in the proof file.
+
+**Step 5 — Submit a Pull Request**
+The runtime opens a pull request against the registry repository. The PR **must** include exactly two files:
+- `registry/issuers/{issuer_id}.json` — the issuer entry from Step 2
+- `registry/proofs/{issuer_id}.proof` — the proof of key ownership from Step 4
+
+**Step 6 — Automated Verification (Tier 1)**
 The CI pipeline automatically verifies:
 1. **Valid Ed25519 key** — machine-verifiable.
 2. **Proof-of-key-ownership signature** — machine-verifiable.
@@ -37,11 +44,11 @@ The CI pipeline automatically verifies:
 
 If all three checks pass, the PR is **automatically merged**. No human approval is required or solicited. See `GOVERNANCE.md` for the full tiered registration model.
 
-**Step 6 — Capability Review (Tier 2 — Optional)**
+**Step 7 — Capability Review (Tier 2 — Optional)**
 New issuers are included with `capabilities_verified: false`. Community auditors may independently review and verify capability claims in a separate PR. Inclusion in the registry never depends on this step.
 
-**Step 7 — Resign & Distribute**
+**Step 8 — Resign & Distribute**
 Once merged, the `registry/manifest.json` is recompiled and cryptographically signed during the next scheduled signing ceremony. Mirrors will pick up the new verified version within their standard synchronization interval.
 
-**Step 8 — Announce**
+**Step 9 — Announce**
 New issuers are automatically appended to the `CHANGELOG.md` and officially announced via standard repository release mechanics.
