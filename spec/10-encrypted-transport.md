@@ -349,7 +349,8 @@ Relay implementations:
 - MUST enforce envelope TTL (`expiry_ts`). Expired envelopes MUST NOT be delivered.
 - MUST support HTTP polling for envelope retrieval.
 - SHOULD support WebSocket subscriptions for real-time delivery (critical for the revocation push model in §5.1).
-- MUST NOT require authentication for reading or writing envelopes. The cryptographic envelope is the access control.
+- SHOULD NOT require authentication beyond the cryptographic envelope for **writing** envelopes. The cryptographic envelope is the access control.
+- For **reading**, relay implementations MAY implement subscriber authentication (e.g., Ed25519 challenge-response) to limit metadata exposure to verified conversation participants. This does not weaken the cryptographic security model but improves delivery assurance — particularly valuable for the revocation push model in §5.1 where confirming that announcements reach intended recipients matters.
 - SHOULD implement rate limiting per IP address to mitigate abuse.
 
 ---
