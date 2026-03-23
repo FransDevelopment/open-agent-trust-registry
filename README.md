@@ -72,6 +72,49 @@ This registry is highly complementary to the [agent.json](https://github.com/Fra
 
 By combining the two, a service can guarantee both *what* the agent intent is (via `agent.json`) and *who* is securely authorizing the execution (via the Open Agent Trust Registry).
 
+## The two trust problems
+
+When AI agents act on behalf of people, paying for things, calling APIs, and making decisions, everyone needs to know who they're dealing with. Just like you wouldn't hand your credit card to a stranger on the street, an API shouldn't blindly trust an agent that shows up claiming to represent someone. This registry exists so that trust between agents and APIs can be verified cryptographically, without relying on any single company to be the gatekeeper.
+
+There are two distinct trust problems. They look similar but they're solved differently:
+
+### Problem 1: "Is this API real?" (API provider identity)
+
+When an agent discovers an API in the [Open 402 Directory](https://github.com/ArcedeDev/open-402), how does it know the API is legitimate?
+
+**Solved by: agent.json Tier 3.** The API provider adds a DID (Decentralized Identifier) and public key to their `agent.json`. This is like a notarized business license. It cryptographically proves the provider owns the domain, without needing a central authority.
+
+```json
+{
+  "identity": {
+    "did": "did:web:example.com",
+    "public_key": "base64url-encoded-ed25519-public-key"
+  }
+}
+```
+
+### Problem 2: "Is this agent authorized?" (Agent runtime trust)
+
+When an AI agent shows up at an API and says "I'm acting on behalf of a user," how does the API know the agent is legitimate? Anyone can write a bot that claims to represent someone.
+
+**Solved by: this registry.** It works like the Certificate Authority system that powers the padlock in your browser:
+
+1. Agent runtimes register their public keys in this registry
+2. When a runtime sends an agent to call an API, the agent carries a signed attestation (a digital ID badge)
+3. The API checks the attestation against this registry: "Is this runtime on the approved list?"
+4. If the signature matches a registered runtime, the agent is trusted
+
+### How it all connects
+
+| Layer | Answers | Who maintains it |
+|-------|---------|-----------------|
+| **[Open 402 Directory](https://github.com/ArcedeDev/open-402)** | "What paid APIs exist?" | Community (open registry) |
+| **agent.json** (on each domain) | "What can this API do?" + "Can it prove it owns this domain?" | Each API provider |
+| **This Trust Registry** | "Is the agent calling me authorized by a legitimate platform?" | Threshold governance (3-of-5 keys) |
+| **On-chain data** (Base) | "Has real money actually flowed through this API?" | The blockchain (immutable) |
+
+Each layer answers a different trust question. Together they form a complete trust infrastructure for the agent economy, with no central authority and every layer independently verifiable. This is what makes it possible for agents to transact with APIs they've never seen before and still know they're safe.
+
 ## Specifications
 
 The architecture and protocols are defined in the `spec/` directory:
