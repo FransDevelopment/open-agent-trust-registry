@@ -213,7 +213,7 @@ Messages are encoded as canonical CBOR maps. The outer envelope is stored and tr
 | Conversation ID | `conv_id` | bytes(16) | YES | Unique conversation identifier. |
 | Message ID | `msg_id` | bytes(16) | YES | Random 16-byte message identifier. |
 | Created | `created_ts` | uint | YES | Unix seconds (UTC). |
-| Expiry | `expiry_ts` | uint | YES | Unix seconds (UTC). Messages past expiry MUST be discarded. |
+| Expiry | `expiry_ts` | uint | YES* | Unix seconds (UTC). Messages past expiry MUST be discarded by receivers. *See §6.2 transition note — relays MUST enforce when present, MAY accept envelopes without it during the transition period. New implementations MUST include this field. |
 | Ciphertext | `ciphertext` | bytes | YES | AEAD-encrypted inner payload. |
 | AAD Hash | `aad_hash` | bytes(32) | YES | `SHA-256(CBOR(aad_struct))` |
 
@@ -346,12 +346,15 @@ Encrypted channels operate over an untrusted store-and-forward relay. The relay 
 Relay implementations:
 
 - MUST serve all endpoints over HTTPS/TLS.
-- MUST enforce envelope TTL (`expiry_ts`). Expired envelopes MUST NOT be delivered.
+- MUST enforce envelope TTL when `expiry_ts` is present. Expired envelopes (where `expiry_ts` is in the past) MUST NOT be delivered.
+- When `expiry_ts` is absent, relay implementations SHOULD fall back to implementation-defined cleanup (e.g., sequence-number windowing). This accommodates existing QSP-1 traffic produced before `expiry_ts` was universally included. Once all WG-aligned implementations include `expiry_ts` in outgoing envelopes, this transition language will be removed and `expiry_ts` will be unconditionally REQUIRED in the outer envelope (§4.1).
 - MUST support HTTP polling for envelope retrieval.
 - SHOULD support WebSocket subscriptions for real-time delivery (critical for the revocation push model in §5.1).
 - SHOULD NOT require authentication beyond the cryptographic envelope for **writing** envelopes. The cryptographic envelope is the access control.
 - For **reading**, relay implementations MAY implement subscriber authentication (e.g., Ed25519 challenge-response) to limit metadata exposure to verified conversation participants. This does not weaken the cryptographic security model but improves delivery assurance — particularly valuable for the revocation push model in §5.1 where confirming that announcements reach intended recipients matters.
 - SHOULD implement rate limiting per IP address to mitigate abuse.
+
+> **Transition note (2026-03):** The qntm relay (version `5d8875ec`) enforces `expiry_ts` when present and passes through envelopes where it is absent. This is the reference behavior for the transition period. Receiver-side `expiry_ts` verification remains the primary guarantee — relay enforcement is defense-in-depth. See [#4](https://github.com/FransDevelopment/open-agent-trust-registry/issues/4) for the alignment discussion.
 
 ---
 
