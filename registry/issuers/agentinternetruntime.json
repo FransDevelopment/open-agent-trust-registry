@@ -1,0 +1,29 @@
+{
+  "issuer_id": "agentinternetruntime",
+  "display_name": "Agent Internet Runtime",
+  "website": "https://agentinternetruntime.com",
+  "security_contact": "info@arcede.com",
+  "status": "active",
+  "added_at": "2026-03-23T11:49:21.664Z",
+  "last_verified": "2026-03-23T11:49:21.664Z",
+  "public_keys": [
+    {
+      "kid": "agentinternetruntime-2026-03",
+      "algorithm": "Ed25519",
+      "public_key": "jywIPY2WMGZLlv5Wx9KpIWzDdOzN8GZXVQYCASKzhgk",
+      "status": "active",
+      "issued_at": "2026-03-23T11:49:21.664Z",
+      "expires_at": "2027-03-23T11:49:21.665Z",
+      "deprecated_at": null,
+      "revoked_at": null
+    }
+  ],
+  "capabilities": {
+    "supervision_model": "tiered",
+    "audit_logging": true,
+    "immutable_audit": false,
+    "attestation_format": "jwt",
+    "max_attestation_ttl_seconds": 3600,
+    "capabilities_verified": false
+  }
+}
