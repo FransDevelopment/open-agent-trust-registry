@@ -14,6 +14,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -412,3 +413,24 @@ jobs:
             });
 
             core.info('PR merged successfully.');
+
+      # ── Step 5: Trigger manifest compilation ────────────────────
+      # When the CI auto-merges via GITHUB_TOKEN, the resulting push
+      # does NOT trigger other workflows (GitHub's loop prevention).
+      # Explicitly dispatch the manifest compiler so new issuers appear
+      # in the signed manifest immediately, not on the next 50-min cycle.
+      - name: Trigger manifest compilation
+        if: |
+          steps.verify.outputs.all_passed == 'true' &&
+          steps.scope.outputs.allowed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.info('Triggering manifest compiler...');
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'manifest-compiler.yml',
+              ref: 'main'
+            });
+            core.info('Manifest compiler dispatched.');
