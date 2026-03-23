@@ -81,7 +81,10 @@ Host a `/.well-known/agent-trust.json` file at the website you declared in Step 
 }
 ```
 
-The `public_key_fingerprint` is the `kid` value printed during Step 1 (format: `{issuer-id}-{YYYY-MM}`). The CI pipeline will fetch this file and verify it matches your registration.
+The `public_key_fingerprint` binds your domain to your registration. The CI accepts any of:
+- The `kid` printed during keygen (e.g., `my-runtime-2026-03`) — **recommended, simplest**
+- The base64url public key from keygen
+- The SHA-256 hash of the public key bytes (base64url) — standard cryptographic fingerprint
 
 ### 4. Generate your proof of key ownership
 
