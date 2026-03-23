@@ -290,10 +290,33 @@ jobs:
                   continue;
                 }
 
-                // Verify public_key_fingerprint matches kid
-                const expectedKid = activeKeys[0].kid;
-                if (domainData.public_key_fingerprint !== expectedKid) {
-                  result.errors.push(`Domain public_key_fingerprint mismatch: expected "${expectedKid}", got "${domainData.public_key_fingerprint}"`);
+                // Verify public_key_fingerprint matches registration
+                // Accept any of: kid, raw public key (base64url), or SHA-256(public_key) (base64url)
+                // Two independent implementers interpreted "fingerprint" as key-derived values,
+                // which is the correct cryptographic convention. The kid is also accepted for
+                // convenience since keygen prints it prominently.
+                const fp = domainData.public_key_fingerprint;
+                const crypto = require('crypto');
+                let fingerprintValid = false;
+
+                for (const key of activeKeys) {
+                  // Match 1: kid (e.g., "my-runtime-2026-03")
+                  if (fp === key.kid) { fingerprintValid = true; break; }
+                  // Match 2: raw public key (base64url)
+                  if (fp === key.public_key) { fingerprintValid = true; break; }
+                  // Match 3: SHA-256 of public key bytes (base64url) — standard fingerprint
+                  const pubkeyBytes = Buffer.from(key.public_key, 'base64url');
+                  const sha256 = crypto.createHash('sha256').update(pubkeyBytes).digest('base64url');
+                  if (fp === sha256) { fingerprintValid = true; break; }
+                }
+
+                if (!fingerprintValid) {
+                  const acceptedValues = activeKeys.map(k => {
+                    const pubkeyBytes = Buffer.from(k.public_key, 'base64url');
+                    const sha256 = crypto.createHash('sha256').update(pubkeyBytes).digest('base64url');
+                    return `kid="${k.kid}", public_key="${k.public_key}", sha256="${sha256}"`;
+                  }).join('; ');
+                  result.errors.push(`Domain public_key_fingerprint "${fp}" does not match any active key. Accepted values: ${acceptedValues}`);
                   results.push(result);
                   allPassed = false;
                   continue;
