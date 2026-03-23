@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-23T20:14:11.668Z",
-  "expires_at": "2026-03-23T21:14:11.668Z",
+  "generated_at": "2026-03-23T21:03:52.473Z",
+  "expires_at": "2026-03-23T22:03:52.473Z",
   "total_issuers": 4,
   "issuers": {
     "agentinternetruntime": {
@@ -121,5 +121,5 @@
       }
     }
   },
-  "signature": "ed25519:KwvlDFpDMu-Nq28TjbN0E__PU7325pZZKYV_71jhWP8rN8hJJrOzl10XT0MQz3RYGGZp6BEUrOfxXlmOmz-8Dg"
+  "signature": "ed25519:8nzcMs0XgbUjsrKHQvvRMAi8FAitTV_Brf6a-NkreYCO1pr7b0uB0IHOb25oBLE3htLoH5TBiSiQ2VIADJppCw"
 }
