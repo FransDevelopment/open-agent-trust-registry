@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-23T20:11:12.387Z",
-  "expires_at": "2026-03-23T21:11:12.387Z",
-  "total_issuers": 3,
+  "generated_at": "2026-03-23T20:14:11.668Z",
+  "expires_at": "2026-03-23T21:14:11.668Z",
+  "total_issuers": 4,
   "issuers": {
     "agentinternetruntime": {
       "issuer_id": "agentinternetruntime",
@@ -62,6 +62,35 @@
         "capabilities_verified": false
       }
     },
+    "arkforge": {
+      "issuer_id": "arkforge",
+      "display_name": "ArkForge",
+      "website": "https://arkforge.tech",
+      "security_contact": "contact@arkforge.fr",
+      "status": "active",
+      "added_at": "2026-03-23T20:00:00.000Z",
+      "last_verified": "2026-03-23T20:00:00.000Z",
+      "public_keys": [
+        {
+          "kid": "arkforge-2026-03",
+          "algorithm": "Ed25519",
+          "public_key": "ZLlGE0eN0eTNUE9vaK1tStf6AuoFUWqJBvqx7QgxfEY",
+          "status": "active",
+          "issued_at": "2026-03-23T20:00:00.000Z",
+          "expires_at": "2027-03-23T20:00:00.000Z",
+          "deprecated_at": null,
+          "revoked_at": null
+        }
+      ],
+      "capabilities": {
+        "supervision_model": "tiered",
+        "audit_logging": true,
+        "immutable_audit": true,
+        "attestation_format": "json",
+        "max_attestation_ttl_seconds": 0,
+        "capabilities_verified": false
+      }
+    },
     "qntm": {
       "issuer_id": "qntm",
       "display_name": "qntm",
@@ -92,5 +121,5 @@
       }
     }
   },
-  "signature": "ed25519:fHpA6nUxxZOx7tMOhe2G_AiFxOHipak2R8qFoqcKeeYioajv9rvmxoGv6_E6Q15afRNAbb-lvrVDLKaMCID_Bw"
+  "signature": "ed25519:KwvlDFpDMu-Nq28TjbN0E__PU7325pZZKYV_71jhWP8rN8hJJrOzl10XT0MQz3RYGGZp6BEUrOfxXlmOmz-8Dg"
 }
