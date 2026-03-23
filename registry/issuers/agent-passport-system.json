@@ -1,0 +1,29 @@
+{
+  "issuer_id": "agent-passport-system",
+  "display_name": "Agent Passport System",
+  "website": "https://aeoess.com",
+  "security_contact": "signal@aeoess.com",
+  "status": "active",
+  "added_at": "2026-03-23T22:00:00.000Z",
+  "last_verified": "2026-03-23T22:00:00.000Z",
+  "public_keys": [
+    {
+      "kid": "aps-registry-2026-03",
+      "algorithm": "Ed25519",
+      "public_key": "Nf1alnpk2lPF5N_bmLS7heWTdLjSxr3ccIIJxt7VVsQ",
+      "status": "active",
+      "issued_at": "2026-03-23T22:00:00.000Z",
+      "expires_at": "2027-03-23T22:00:00.000Z",
+      "deprecated_at": null,
+      "revoked_at": null
+    }
+  ],
+  "capabilities": {
+    "supervision_model": "delegation_chain",
+    "audit_logging": true,
+    "immutable_audit": true,
+    "attestation_format": "aps-receipt-v1",
+    "max_attestation_ttl_seconds": 604800,
+    "capabilities_verified": false
+  }
+}
