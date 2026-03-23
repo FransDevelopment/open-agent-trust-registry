@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-23T21:10:03.159Z",
-  "expires_at": "2026-03-23T22:10:03.159Z",
-  "total_issuers": 5,
+  "generated_at": "2026-03-23T22:00:29.546Z",
+  "expires_at": "2026-03-23T23:00:29.546Z",
+  "total_issuers": 6,
   "issuers": {
     "agent-passport-system": {
       "issuer_id": "agent-passport-system",
@@ -30,6 +30,35 @@
         "immutable_audit": true,
         "attestation_format": "aps-receipt-v1",
         "max_attestation_ttl_seconds": 604800,
+        "capabilities_verified": false
+      }
+    },
+    "agentid": {
+      "issuer_id": "agentid",
+      "display_name": "AgentID",
+      "website": "https://getagentid.dev",
+      "security_contact": "hello@getagentid.dev",
+      "status": "active",
+      "added_at": "2026-03-23T18:59:04.823Z",
+      "last_verified": "2026-03-23T18:59:04.823Z",
+      "public_keys": [
+        {
+          "kid": "agentid-2026-03",
+          "algorithm": "Ed25519",
+          "public_key": "xdpmjfq2DX4d6yML7QjaSkYB2h9Dm3phwts5gkAPBp8",
+          "status": "active",
+          "issued_at": "2026-03-23T18:59:04.823Z",
+          "expires_at": "2027-03-23T18:59:04.823Z",
+          "deprecated_at": null,
+          "revoked_at": null
+        }
+      ],
+      "capabilities": {
+        "supervision_model": "tiered",
+        "audit_logging": true,
+        "immutable_audit": false,
+        "attestation_format": "jwt",
+        "max_attestation_ttl_seconds": 3600,
         "capabilities_verified": false
       }
     },
@@ -150,5 +179,5 @@
       }
     }
   },
-  "signature": "ed25519:IUJIjHGKKVMBnsQNbSLJM9Dt-xkeMjn4d2LnJU3_xHdStjtZriiK-20eZLYWIb0vXJ7nOdBRDFQKnPJRO5LrAw"
+  "signature": "ed25519:ELxNvMtevAHt4TtghSZbFWb359_rhY9o3X-iM1xbtSnmsex0CId2NrH0ehxZZconhnW7IAtPl8FaVUFn6P75Ag"
 }
