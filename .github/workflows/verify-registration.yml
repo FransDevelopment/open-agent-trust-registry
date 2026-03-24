@@ -383,6 +383,7 @@ jobs:
                 }
 
                 result.domain = true;
+                result.domainSource = verificationSource;
 
               } catch (e) {
                 result.errors.push(`Unexpected error: ${e.message}`);
@@ -400,7 +401,7 @@ jobs:
               body += `| Check | Status |\n|-------|--------|\n`;
               body += `| Schema validation | ${r.schema ? '✅ Pass' : '❌ Fail'} |\n`;
               body += `| Proof-of-key-ownership | ${r.proof ? '✅ Pass' : '❌ Fail'} |\n`;
-              body += `| Domain verification | ${r.domain ? '✅ Pass' : '❌ Fail'} |\n\n`;
+              body += `| Domain verification | ${r.domain ? '✅ Pass' + (r.domainSource ? ` (via ${r.domainSource})` : '') : '❌ Fail'} |\n\n`;
               if (r.errors.length > 0) {
                 body += `**Errors:**\n`;
                 for (const err of r.errors) {
