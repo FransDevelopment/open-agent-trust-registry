@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "generated_at": "2026-03-24T17:13:53.654Z",
-  "expires_at": "2026-03-24T18:13:53.654Z",
+  "generated_at": "2026-03-24T18:10:07.071Z",
+  "expires_at": "2026-03-24T19:10:07.071Z",
   "total_issuers": 7,
   "issuers": {
     "agent-passport-system": {
@@ -208,5 +208,5 @@
       }
     }
   },
-  "signature": "ed25519:vJV261trsiCLoZUcCpw-ROOX_kY_C7bMK3i3TL9Qp1Nx6FiXdu84IbBvulauPgwxRuv_1ZaVl8jM0OsG9RJUBQ"
+  "signature": "ed25519:3F8hzUiZJ-hs8CiQ8LFQQuI_GN7J_jGTnWqtF5tExiFVxqyFc-JN1r0fuv9wco5cXNLRJz0h_h8_Z66V-6bdBQ"
 }
