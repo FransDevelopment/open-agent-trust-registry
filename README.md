@@ -218,6 +218,11 @@ The architecture and protocols are defined in the `spec/` directory:
 - [07: Attestation Format](spec/07-attestation-format.md)
 - [08: Security Model](spec/08-security-model.md)
 - [09: Service Integration Guidance](spec/09-service-integration.md)
+- [10: Encrypted Transport](spec/10-encrypted-transport.md)
+- [11: Proof of Key Ownership](spec/11-proof-of-key-ownership.md)
+
+### Draft Specifications
+- [Multi-Signature Ceremony](docs/multi-sig-ceremony.md) — 3-of-5 threshold signing (FROST) for registry governance
 
 ## Governance & Contributions
 
