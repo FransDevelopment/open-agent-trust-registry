@@ -243,3 +243,7 @@ The architecture and protocols are defined in the `spec/` directory:
 ## Governance & Contributions
 
 This project is community-owned. Please see [GOVERNANCE.md](GOVERNANCE.md) to understand how decisions are made, how keys are managed, and how you can join as a maintainer.
+
+## Links
+
+[![Hypercommit](https://img.shields.io/badge/Hypercommit-DB2475)](https://hypercommit.com/open-agent-trust-registry)
