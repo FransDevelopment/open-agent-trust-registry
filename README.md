@@ -68,11 +68,30 @@ npx @open-agent-trust/cli register \
 
 This generates a `my-runtime.json` file. Review the `capabilities` block to match your runtime's actual profile before submitting.
 
-### 3. Host your domain verification file
+### 3. Host your domain verification
 
-Host a `/.well-known/agent-trust.json` file at the website you declared in Step 2. This proves you control the domain — the same model used by Let's Encrypt and DNS-based domain verification.
+Prove you control the domain you declared in Step 2. The CI checks two locations in order:
 
-**At `https://my-runtime.com/.well-known/agent-trust.json`:**
+**Option A (recommended): Add `oatr_issuer_id` to your `agent.json`**
+
+If your domain already hosts an [`agent.json`](https://github.com/FransDevelopment/agent-json) manifest (v1.4+), add your issuer ID to the identity block:
+
+```json
+{
+  "version": "1.4",
+  "origin": "my-runtime.com",
+  "payout_address": "0x...",
+  "identity": {
+    "did": "did:web:my-runtime.com",
+    "public_key": "<PUBLIC_KEY_FROM_STEP_1>",
+    "oatr_issuer_id": "my-runtime"
+  }
+}
+```
+
+**Option B: Host a standalone `agent-trust.json`**
+
+At `https://my-runtime.com/.well-known/agent-trust.json`:
 
 ```json
 {
@@ -81,10 +100,7 @@ Host a `/.well-known/agent-trust.json` file at the website you declared in Step 
 }
 ```
 
-The `public_key_fingerprint` binds your domain to your registration. The CI accepts any of:
-- The `kid` printed during keygen (e.g., `my-runtime-2026-03`) — **recommended, simplest**
-- The base64url public key from keygen
-- The SHA-256 hash of the public key bytes (base64url) — standard cryptographic fingerprint
+The `public_key_fingerprint` binds your domain to your registration. The CI accepts: the `kid` from keygen, the base64url public key, the SHA-256 hash of the public key (base64url), or `Trunc16(SHA-256)` in hex.
 
 ### 4. Generate your proof of key ownership
 

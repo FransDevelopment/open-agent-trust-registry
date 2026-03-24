@@ -250,28 +250,43 @@ jobs:
                 result.proof = true;
 
                 // ── Domain Verification ──
+                // v1.4 consolidation: check agent.json first for identity.oatr_issuer_id,
+                // then fall back to agent-trust.json for backwards compatibility.
                 const website = issuer.website.replace(/\/+$/, '');
-                const verificationUrl = `${website}/.well-known/agent-trust.json`;
 
                 let domainData;
+                let verificationSource = 'unknown';
+
+                // Attempt 1: Check agent.json for identity.oatr_issuer_id (v1.4+)
                 try {
-                  const controller = new AbortController();
-                  const timeout = setTimeout(() => controller.abort(), 10000);
-                  const response = await fetch(verificationUrl, {
-                    signal: controller.signal,
+                  const agentJsonUrl = `${website}/.well-known/agent.json`;
+                  const ctrl = new AbortController();
+                  const t = setTimeout(() => ctrl.abort(), 10000);
+                  const res = await fetch(agentJsonUrl, {
+                    signal: ctrl.signal,
                     headers: { 'User-Agent': 'OATR-CI-Verification/1.0' }
                   });
-                  clearTimeout(timeout);
+                  clearTimeout(t);
 
-                  if (!response.ok) {
-                    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+                  if (res.ok) {
+                    const agentJson = await res.json();
+                    if (agentJson.identity && agentJson.identity.oatr_issuer_id) {
+                      domainData = {
+                        issuer_id: agentJson.identity.oatr_issuer_id,
+                        public_key_fingerprint: agentJson.identity.public_key || agentJson.identity.oatr_issuer_id
+                      };
+                      verificationSource = 'agent.json';
+                      core.info(`Domain verification via agent.json (identity.oatr_issuer_id: ${domainData.issuer_id})`);
+                    }
                   }
-                  domainData = await response.json();
                 } catch (e) {
-                  // Retry once
+                  core.info(`agent.json not available or missing oatr_issuer_id: ${e.message}`);
+                }
+
+                // Attempt 2: Fall back to agent-trust.json
+                if (!domainData) {
+                  const verificationUrl = `${website}/.well-known/agent-trust.json`;
                   try {
-                    core.info(`Domain verification failed, retrying: ${e.message}`);
-                    await new Promise(r => setTimeout(r, 2000));
                     const controller = new AbortController();
                     const timeout = setTimeout(() => controller.abort(), 10000);
                     const response = await fetch(verificationUrl, {
@@ -284,11 +299,31 @@ jobs:
                       throw new Error(`HTTP ${response.status} ${response.statusText}`);
                     }
                     domainData = await response.json();
-                  } catch (retryErr) {
-                    result.errors.push(`Domain verification failed: could not fetch ${verificationUrl} — ${retryErr.message}`);
-                    results.push(result);
-                    allPassed = false;
-                    continue;
+                    verificationSource = 'agent-trust.json';
+                  } catch (e) {
+                    // Retry once
+                    try {
+                      core.info(`Domain verification failed, retrying: ${e.message}`);
+                      await new Promise(r => setTimeout(r, 2000));
+                      const controller = new AbortController();
+                      const timeout = setTimeout(() => controller.abort(), 10000);
+                      const response = await fetch(verificationUrl, {
+                        signal: controller.signal,
+                        headers: { 'User-Agent': 'OATR-CI-Verification/1.0' }
+                      });
+                      clearTimeout(timeout);
+
+                      if (!response.ok) {
+                        throw new Error(`HTTP ${response.status} ${response.statusText}`);
+                      }
+                      domainData = await response.json();
+                      verificationSource = 'agent-trust.json';
+                    } catch (retryErr) {
+                      result.errors.push(`Domain verification failed: could not fetch agent.json or agent-trust.json from ${website} — ${retryErr.message}`);
+                      results.push(result);
+                      allPassed = false;
+                      continue;
+                    }
                   }
                 }
 
