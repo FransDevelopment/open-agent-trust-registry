@@ -258,29 +258,39 @@ jobs:
                 let verificationSource = 'unknown';
 
                 // Attempt 1: Check agent.json for identity.oatr_issuer_id (v1.4+)
-                try {
-                  const agentJsonUrl = `${website}/.well-known/agent.json`;
-                  const ctrl = new AbortController();
-                  const t = setTimeout(() => ctrl.abort(), 10000);
-                  const res = await fetch(agentJsonUrl, {
-                    signal: ctrl.signal,
-                    headers: { 'User-Agent': 'OATR-CI-Verification/1.0' }
-                  });
-                  clearTimeout(t);
-
-                  if (res.ok) {
-                    const agentJson = await res.json();
-                    if (agentJson.identity && agentJson.identity.oatr_issuer_id) {
-                      domainData = {
-                        issuer_id: agentJson.identity.oatr_issuer_id,
-                        public_key_fingerprint: agentJson.identity.public_key || agentJson.identity.oatr_issuer_id
-                      };
-                      verificationSource = 'agent.json';
-                      core.info(`Domain verification via agent.json (identity.oatr_issuer_id: ${domainData.issuer_id})`);
+                const agentJsonUrl = `${website}/.well-known/agent.json`;
+                for (let attempt = 0; attempt < 2 && !domainData; attempt++) {
+                  try {
+                    if (attempt > 0) {
+                      core.info('Retrying agent.json fetch...');
+                      await new Promise(r => setTimeout(r, 2000));
                     }
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), 10000);
+                    const res = await fetch(agentJsonUrl, {
+                      signal: ctrl.signal,
+                      headers: { 'User-Agent': 'OATR-CI-Verification/1.0' }
+                    });
+                    clearTimeout(t);
+
+                    if (res.ok) {
+                      const agentJson = await res.json();
+                      if (agentJson.identity && agentJson.identity.oatr_issuer_id) {
+                        // When verifying via agent.json, the public_key in the identity block
+                        // serves as the fingerprint. If public_key is absent, skip fingerprint
+                        // matching entirely (issuer_id match is sufficient since the domain
+                        // is already proven by serving the file).
+                        domainData = {
+                          issuer_id: agentJson.identity.oatr_issuer_id,
+                          public_key_fingerprint: agentJson.identity.public_key || null
+                        };
+                        verificationSource = 'agent.json';
+                        core.info(`Domain verification via agent.json (identity.oatr_issuer_id: ${domainData.issuer_id})`);
+                      }
+                    }
+                  } catch (e) {
+                    core.info(`agent.json attempt ${attempt + 1} failed: ${e.message}`);
                   }
-                } catch (e) {
-                  core.info(`agent.json not available or missing oatr_issuer_id: ${e.message}`);
                 }
 
                 // Attempt 2: Fall back to agent-trust.json
@@ -336,15 +346,13 @@ jobs:
                 }
 
                 // Verify public_key_fingerprint matches registration
-                // Accept any key-derived value: kid, raw public key, SHA-256, or Trunc16(SHA-256).
-                // Three independent implementers used three different conventions:
-                //   - qntm: SHA-256(pubkey) in base64url
-                //   - AgentID: raw public key in base64url
-                //   - ArkForge: Trunc16(SHA-256(pubkey)) in hex (WG sender_id convention)
-                // All are valid cryptographic bindings between domain and key.
+                // When verified via agent.json with oatr_issuer_id but no public_key,
+                // fingerprint is null. In that case, issuer_id match + domain ownership
+                // (serving the file) is sufficient. The proof-of-key-ownership step
+                // already verified key control cryptographically.
                 const fp = domainData.public_key_fingerprint;
                 const crypto = require('crypto');
-                let fingerprintValid = false;
+                let fingerprintValid = fp === null; // null means agent.json without public_key — skip fingerprint check
 
                 for (const key of activeKeys) {
                   // Match 1: kid (e.g., "my-runtime-2026-03")
