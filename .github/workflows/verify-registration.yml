@@ -63,7 +63,8 @@ jobs:
 
           echo "allowed=$ALLOWED" >> "$GITHUB_OUTPUT"
           if [ "$ALLOWED" != "true" ]; then
-            echo "::warning::File-scope check failed. This PR will not be auto-merged but verification will still run."
+            echo "::error::File-scope check failed. This PR modifies unauthorized files! Aborting workflow to prevent arbitrary code execution."
+            exit 1
           fi
 
       # ── Step 1: Detect new/changed issuer files ────────────────────

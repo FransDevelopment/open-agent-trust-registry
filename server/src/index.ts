@@ -23,6 +23,12 @@ app.get('/v1/registry', async (c) => {
 // 2. GET /v1/registry/:issuer_id
 app.get('/v1/registry/:issuer_id', async (c) => {
     const issuerId = c.req.param('issuer_id');
+    
+    // Security: Prevent path traversal by strictly validating issuer_id format
+    if (!/^[a-z0-9-]+$/.test(issuerId)) {
+        return c.json({ error: 'Invalid issuer_id format' }, 400);
+    }
+
     try {
         // Technically this could just be read from the manifest to save disk IO,
         // but it mimics reading the raw registration file perfectly.
