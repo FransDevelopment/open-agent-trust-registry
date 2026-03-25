@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { verifyAttestation, OpenAgentTrustRegistry } from '@open-agent-trust/registry';
+import { verifyAttestation, verifyRegistryArtifacts, OpenAgentTrustRegistryError } from '../../sdk/typescript/src';
 
 const app = new Hono();
 
@@ -57,18 +57,24 @@ app.post('/v1/verify', async (c) => {
         // within the registry agent, but for a simple wrapper we read the states fresh
         const manifestStr = await readFile(join(REGISTRY_DIR, 'manifest.json'), 'utf8');
         const revocationsStr = await readFile(join(REGISTRY_DIR, 'revocations.json'), 'utf8');
+        const manifest = JSON.parse(manifestStr);
+        const revocations = JSON.parse(revocationsStr);
+        const verifiedState = verifyRegistryArtifacts(manifest, revocations);
 
         // Fire the agnostic 14-step SDK engine
         const result = await verifyAttestation(
             body.attestation,
-            JSON.parse(manifestStr),
-            JSON.parse(revocationsStr),
+            verifiedState.manifest,
+            verifiedState.revocations,
             body.audience,
             body.nonce
         );
 
         return c.json(result);
     } catch (e) {
+        if (e instanceof OpenAgentTrustRegistryError) {
+            return c.json({ error: e.code, message: e.message }, 503);
+        }
         return c.json({ error: 'Invalid verification payload' }, 400);
     }
 });
@@ -83,7 +89,7 @@ app.post('/v1/register', async (c) => {
 // Health check
 app.get('/health', (c) => c.json({ status: 'ok', time: new Date().toISOString() }));
 
-const port = 3000;
+const port = Number(process.env.PORT || 3000);
 console.log(`Open Agent Trust Registry running at http://localhost:${port}`);
 
 serve({

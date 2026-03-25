@@ -92,7 +92,8 @@ describe('OpenAgentTrustRegistry (Client)', () => {
         generated_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + 86400000).toISOString(),
         revoked_issuers: [{ issuer_id: 'revoked-issuer', reason: 'policy_violation', revoked_at: new Date().toISOString() }],
-        revoked_keys: []
+        revoked_keys: [],
+        signature: { algorithm: 'Ed25519', kid: 'registry-root-2026-03', value: 'placeholder' }
     };
   });
 

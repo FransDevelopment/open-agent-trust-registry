@@ -1,6 +1,6 @@
 import XCTest
 import Crypto
-@testable import AgentTrustRegistry
+@testable import OpenAgentTrustRegistry
 
 final class AgentTrustRegistryTests: XCTestCase {
 
@@ -107,8 +107,21 @@ final class AgentTrustRegistryTests: XCTestCase {
             expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400)),
             revokedKeys: [],
             revokedIssuers: [RevokedIssuer(issuerId: "revoked-issuer", revokedAt: isoFormatter.string(from: now), reason: "policy_violation")],
-            signature: nil
+            signature: RegistrySignature(algorithm: .ed25519, kid: "registry-root-2026-03", value: "placeholder")
         )
+    }
+
+    func loadRepoJSON(_ path: String) throws -> Data {
+        let url = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .appendingPathComponent(path)
+        return try Data(contentsOf: url)
+    }
+
+    func parseISO(_ timestamp: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let fallbackFormatter = ISO8601DateFormatter()
+        return formatter.date(from: timestamp) ?? fallbackFormatter.date(from: timestamp)
     }
 
     func signToken(
@@ -238,5 +251,123 @@ final class AgentTrustRegistryTests: XCTestCase {
         
         XCTAssertFalse(result.valid)
         XCTAssertEqual(result.reason, .nonceMismatch)
+    }
+
+    func testCheckedInArtifactsVerifyWhenFresh() throws {
+        let manifestData = try loadRepoJSON("../../registry/manifest.json")
+        let revocationsData = try loadRepoJSON("../../registry/revocations.json")
+        let decoder = JSONDecoder()
+        let manifest = try decoder.decode(RegistryManifest.self, from: manifestData)
+        let now = parseISO(manifest.generatedAt) ?? Date()
+
+        let verified = try RegistryArtifactVerifier.verifyArtifacts(
+            manifestData: manifestData,
+            revocationsData: revocationsData,
+            now: now
+        )
+
+        XCTAssertEqual(verified.manifest.registryId, "open-trust-registry")
+        XCTAssertFalse(verified.manifest.entries.isEmpty)
+    }
+
+    func testExpiredManifestIsRejected() throws {
+        let manifestData = try loadRepoJSON("../../registry/manifest.json")
+        let revocationsData = try loadRepoJSON("../../registry/revocations.json")
+        let decoder = JSONDecoder()
+        let manifest = try decoder.decode(RegistryManifest.self, from: manifestData)
+        let now = parseISO(manifest.expiresAt)?.addingTimeInterval(1) ?? Date()
+
+        XCTAssertThrowsError(
+            try RegistryArtifactVerifier.verifyArtifacts(
+                manifestData: manifestData,
+                revocationsData: revocationsData,
+                now: now
+            )
+        ) { error in
+            guard case OpenAgentTrustRegistryError.staleRegistryState(let message) = error else {
+                return XCTFail("Expected staleRegistryState, got \(error)")
+            }
+            XCTAssertTrue(message.contains("manifest"))
+        }
+    }
+
+    func testExpiredRevocationsAreRejected() throws {
+        let manifestData = try loadRepoJSON("../../registry/manifest.json")
+        let revocationsData = try loadRepoJSON("../../registry/revocations.json")
+        let decoder = JSONDecoder()
+        let revocations = try decoder.decode(RevocationList.self, from: revocationsData)
+        let now = parseISO(revocations.expiresAt)?.addingTimeInterval(1) ?? Date()
+
+        XCTAssertThrowsError(
+            try RegistryArtifactVerifier.verifyArtifacts(
+                manifestData: manifestData,
+                revocationsData: revocationsData,
+                now: now
+            )
+        ) { error in
+            guard case OpenAgentTrustRegistryError.staleRegistryState(let message) = error else {
+                return XCTFail("Expected staleRegistryState, got \(error)")
+            }
+            XCTAssertTrue(message.contains("revocations"))
+        }
+    }
+
+    func testTamperedManifestSignatureIsRejected() throws {
+        let manifestData = try loadRepoJSON("../../registry/manifest.json")
+        let revocationsData = try loadRepoJSON("../../registry/revocations.json")
+        let decoder = JSONDecoder()
+        let manifest = try decoder.decode(RegistryManifest.self, from: manifestData)
+        let now = parseISO(manifest.generatedAt) ?? Date()
+
+        var object = try XCTUnwrap(JSONSerialization.jsonObject(with: manifestData) as? [String: Any])
+        var entries = try XCTUnwrap(object["entries"] as? [[String: Any]])
+        entries[0]["display_name"] = "Tampered"
+        object["entries"] = entries
+        let tampered = try JSONSerialization.data(withJSONObject: object, options: [])
+
+        XCTAssertThrowsError(
+            try RegistryArtifactVerifier.verifyArtifacts(
+                manifestData: tampered,
+                revocationsData: revocationsData,
+                now: now
+            )
+        ) { error in
+            guard case OpenAgentTrustRegistryError.invalidRegistrySignature(let message) = error else {
+                return XCTFail("Expected invalidRegistrySignature, got \(error)")
+            }
+            XCTAssertTrue(message.contains("manifest"))
+        }
+    }
+
+    func testTamperedRevocationSignatureIsRejected() throws {
+        let manifestData = try loadRepoJSON("../../registry/manifest.json")
+        let revocationsData = try loadRepoJSON("../../registry/revocations.json")
+        let decoder = JSONDecoder()
+        let manifest = try decoder.decode(RegistryManifest.self, from: manifestData)
+        let now = parseISO(manifest.generatedAt) ?? Date()
+
+        var object = try XCTUnwrap(JSONSerialization.jsonObject(with: revocationsData) as? [String: Any])
+        var revokedKeys = (object["revoked_keys"] as? [[String: Any]]) ?? []
+        revokedKeys.append([
+            "issuer_id": "tampered-runtime",
+            "kid": "tampered-key",
+            "revoked_at": manifest.generatedAt,
+            "reason": "key_compromise"
+        ])
+        object["revoked_keys"] = revokedKeys
+        let tampered = try JSONSerialization.data(withJSONObject: object, options: [])
+
+        XCTAssertThrowsError(
+            try RegistryArtifactVerifier.verifyArtifacts(
+                manifestData: manifestData,
+                revocationsData: tampered,
+                now: now
+            )
+        ) { error in
+            guard case OpenAgentTrustRegistryError.invalidRegistrySignature(let message) = error else {
+                return XCTFail("Expected invalidRegistrySignature, got \(error)")
+            }
+            XCTAssertTrue(message.contains("revocations"))
+        }
     }
 }

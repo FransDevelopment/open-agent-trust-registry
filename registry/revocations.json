@@ -1,9 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-15T12:00:00Z",
-  "expires_at": "2026-03-16T12:00:00Z",
-  "_comment": "Revocation list is unsigned during bootstrap. Will be signed once root key ceremony is complete.",
+  "generated_at": "2026-03-24T22:59:22.150Z",
+  "expires_at": "2026-03-24T23:04:22.150Z",
   "revoked_keys": [],
   "revoked_issuers": [],
-  "signature": null
+  "signature": {
+    "algorithm": "Ed25519",
+    "kid": "registry-root-2026-03",
+    "value": "GTZy4tEg2pTONugZ5WNYBoRmjV9J6dO91Plmt_QDOT1sjOchtuwgPs7ZX2DkRIe3HiM_362_UqkX62GVjNucAA"
+  }
 }

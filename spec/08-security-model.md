@@ -21,7 +21,7 @@ Every registered issuer is tied to:
 Registration creates an irrevocable accountability chain. The issuer cannot later deny their participation — their public key and domain binding are part of the signed registry history.
 
 ### 1.3 Rapid Revocation
-Compromised or malicious issuers can be revoked through the governance process. The revocation list is updated on a 5-minute cycle, allowing services polling the list to reject compromised issuers within minutes.
+Compromised or malicious issuers can be revoked through the governance process. Changes to the revocation list trigger an immediate manifest recompilation on merge. Services polling the list will reject compromised issuers within minutes of governance approval.
 
 ### 1.4 Tamper Evidence
 The registry manifest is cryptographically signed. Any modification to the manifest (adding, removing, or altering an issuer entry) invalidates the signature. Mirrors cannot serve tampered data without detection.
@@ -52,10 +52,10 @@ The registry does not prevent malicious actors from registering. It provides **a
 | **Compromised mirror** | Attacker serves a modified registry with a rogue issuer | All registry data is signed. Clients verify the signature before trusting any data. A compromised mirror cannot forge a valid signature. |
 | **Compromised root key** | Attacker can sign arbitrary registry content | Threshold signing (3-of-5). Compromising a single key is insufficient. Keys held offline on secure hardware. |
 | **Malicious issuer registration** | A bad actor registers and issues harmful attestations | Registration creates a permanent audit trail. Services apply their own trust policies. Revocation available within minutes via governance. |
-| **Stale registry at service** | Service has an old copy missing a recent revocation | `expires_at` fields on both manifest and revocation list. Clients MUST reject expired data and fetch fresh copies. Revocation list has a 5-minute expiry. |
+| **Stale registry at service** | Service has an old copy missing a recent revocation | `expires_at` fields on both manifest and revocation list. Clients MUST reject expired data and fetch fresh copies. The SDK's default cache TTL is 15 minutes. |
 | **Attestation replay (same service)** | Attacker captures a valid attestation and replays it | Attestations include a service-provided nonce and short TTL. Replays fail the nonce or expiry check. |
 | **Cross-service attestation replay** | Attacker uses an attestation issued for Service A at Service B | The `aud` claim binds the attestation to a specific service origin. Service B rejects attestations where `aud` does not match. |
-| **Key compromise at issuer** | Attacker obtains an issuer's private key and forges attestations | Issuer submits an emergency revocation PR. Key is revoked (skipping deprecation). Revocation list updated within 5 minutes. |
+| **Key compromise at issuer** | Attacker obtains an issuer's private key and forges attestations | Issuer submits an emergency revocation PR. Key is revoked (skipping deprecation). Revocation list recompiled immediately on merge. |
 
 ---
 

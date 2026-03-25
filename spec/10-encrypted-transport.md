@@ -288,7 +288,7 @@ This section describes motivating use cases for encrypted transport between regi
 
 #### 5.1 Real-Time Revocation Distribution
 
-The registry's current revocation model relies on polling: services fetch `revocations.json` on a 5-minute cycle (see [05-revocation.md](05-revocation.md)). For time-critical revocations (key compromise, active exploitation), 5 minutes is a meaningful exposure window.
+The registry's current revocation model relies on polling: services fetch `revocations.json` at their configured cache interval (SDK default: 15 minutes; see [05-revocation.md](05-revocation.md)). Changes to the revocation list trigger an immediate recompilation on merge. For time-critical revocations (key compromise, active exploitation), the polling interval is a meaningful exposure window.
 
 Encrypted transport enables a **push model**: the registry governance council or the compromised issuer itself can broadcast a signed revocation announcement to all subscribed mirrors and services over an encrypted channel. Subscribers receive the revocation within seconds rather than minutes.
 
@@ -297,7 +297,7 @@ Encrypted transport enables a **push model**: the registry governance council or
 - The channel MUST be authenticated via registry-bound identity proof (§3.3). Revocation announcements from unauthenticated sources MUST be ignored.
 - Revocation messages MUST be independently verifiable. Recipients MUST NOT apply a revocation solely because it arrived on an encrypted channel — the revocation itself must carry a valid signature from an authorized party.
 - Encrypted revocation channels supplement, not replace, the polling model. Services that do not implement encrypted transport continue to rely on polling `revocations.json`.
-- The push model reduces the **expected** revocation propagation time from ~2.5 minutes (half the polling interval) to under 1 second for subscribed services.
+- The push model reduces the **expected** revocation propagation time from the polling interval to under 1 second for subscribed services.
 
 #### 5.2 Inter-Issuer Coordination
 
@@ -385,7 +385,7 @@ An encrypted channel is only as trustworthy as the registry verification that au
 
 - **Revoked keys.** If an issuer's Ed25519 key is revoked (via the process in [05-revocation.md](05-revocation.md)), all channels using the derived X25519 key material are no longer registry-authenticated. Implementations SHOULD terminate channels when they detect that the underlying key has been revoked.
 - **Expired manifests.** Implementations MUST periodically re-verify channel participants against a fresh registry manifest. A channel authenticated against an expired manifest provides no registry assurance.
-- **Registry-check frequency.** Implementations SHOULD re-verify registry status at least every 5 minutes (aligned with the revocation list update cycle) or upon receiving a push revocation notification (§5.1).
+- **Registry-check frequency.** Implementations SHOULD re-verify registry status at their configured cache interval (SDK default: 15 minutes) or upon receiving a push revocation notification (§5.1).
 
 #### 7.3 Metadata Exposure
 

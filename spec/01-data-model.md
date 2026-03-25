@@ -30,6 +30,41 @@ The single signed document containing all trusted issuers.
 | `entries` | array | Array of `IssuerEntry` objects |
 | `signature` | object | Registry maintainer signature over the canonical JSON of all other fields |
 
+### Signature Canonicalization
+
+The signed bytes for both `manifest.json` and `revocations.json` are produced as follows:
+
+1. Remove the top-level `signature` field entirely.
+2. Canonicalize the remaining JSON using RFC 8785 JSON Canonicalization Scheme (JCS).
+3. UTF-8 encode the canonical JSON bytes.
+4. Sign those bytes with the active Ed25519 root key referenced by `signature.kid`.
+
+Clients MUST reconstruct the same canonical byte stream before verifying the signature.
+
+## 1.1 Root Trust Anchor (`root-keys.json`)
+
+Clients bootstrap trust from a checked-in root key set:
+
+```json
+{
+  "schema_version": "1.0.0",
+  "registry_id": "open-trust-registry",
+  "generated_at": "2026-03-24T00:00:00Z",
+  "keys": [
+    {
+      "kid": "registry-root-2026-03",
+      "algorithm": "Ed25519",
+      "public_key": "base64url-ed25519-public-key",
+      "status": "active",
+      "not_before": "2026-03-24T00:00:00Z",
+      "not_after": null
+    }
+  ]
+}
+```
+
+Clients MUST reject signed artifacts whose `signature.kid` is missing from `root-keys.json`, not yet valid, expired, or retired.
+
 ## 2. Issuer Entry
 
 Each entry models one trusted attestation issuer.

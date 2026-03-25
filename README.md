@@ -29,6 +29,8 @@ A core feature of the registry is that the `manifest.json` is cryptographically 
 
 If a malicious actor hosts a mirror server and tries to secretly add a hacker to the list, the cryptographic signature of the file breaks. When a website downloads that list, the SDK will instantly detect the invalid signature and reject the entire file. Mirror servers are "zero-trust messengers"—they can distribute the data, but they cannot fake it.
 
+The SDK bootstraps this verification from the checked-in `root-keys.json` trust anchor and rejects both tampered and expired registry artifacts.
+
 ## Design Principles
 
 1. **Open from day one.** MIT or Apache 2.0 licensed. No proprietary extensions, no dual licensing, no "open core."
@@ -145,10 +147,8 @@ npm install @open-agent-trust/registry
 ```typescript
 import { OpenAgentTrustRegistry } from '@open-agent-trust/registry';
 
-const registry = new OpenAgentTrustRegistry();
-const result = await registry.verifyAttestation(jwt, {
-  audience: 'https://your-api.com'
-});
+const registry = await OpenAgentTrustRegistry.load('https://your-mirror.example');
+const result = await registry.verifyToken(jwt, 'https://your-api.com');
 ```
 
 ### Understanding the roles

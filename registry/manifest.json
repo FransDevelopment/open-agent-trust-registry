@@ -1,10 +1,19 @@
 {
+<<<<<<< Updated upstream
   "version": "1.0",
   "generated_at": "2026-03-24T23:59:17.377Z",
   "expires_at": "2026-03-25T00:59:17.377Z",
   "total_issuers": 7,
   "issuers": {
     "agent-passport-system": {
+=======
+  "schema_version": "1.0.0",
+  "registry_id": "open-trust-registry",
+  "generated_at": "2026-03-24T22:59:22.150Z",
+  "expires_at": "2026-03-24T23:59:22.150Z",
+  "entries": [
+    {
+>>>>>>> Stashed changes
       "issuer_id": "agent-passport-system",
       "display_name": "Agent Passport System",
       "website": "https://aeoess.com",
@@ -33,7 +42,7 @@
         "capabilities_verified": false
       }
     },
-    "agentid": {
+    {
       "issuer_id": "agentid",
       "display_name": "AgentID",
       "website": "https://getagentid.dev",
@@ -62,7 +71,7 @@
         "capabilities_verified": false
       }
     },
-    "agentinternetruntime": {
+    {
       "issuer_id": "agentinternetruntime",
       "display_name": "Agent Internet Runtime",
       "website": "https://agentinternetruntime.com",
@@ -91,7 +100,7 @@
         "capabilities_verified": false
       }
     },
-    "agora": {
+    {
       "issuer_id": "agora",
       "display_name": "Agent Agora",
       "website": "https://the-agora.dev",
@@ -120,7 +129,7 @@
         "capabilities_verified": false
       }
     },
-    "arcede": {
+    {
       "issuer_id": "arcede",
       "display_name": "Arcede",
       "website": "https://arcede.com",
@@ -149,7 +158,7 @@
         "capabilities_verified": false
       }
     },
-    "arkforge": {
+    {
       "issuer_id": "arkforge",
       "display_name": "ArkForge",
       "website": "https://arkforge.tech",
@@ -178,7 +187,7 @@
         "capabilities_verified": false
       }
     },
-    "qntm": {
+    {
       "issuer_id": "qntm",
       "display_name": "qntm",
       "website": "https://inbox.qntm.corpo.llc",
@@ -207,6 +216,15 @@
         "capabilities_verified": false
       }
     }
+<<<<<<< Updated upstream
   },
   "signature": "ed25519:rhvxEk_mVGFZ1J0EUhyd-b18wrrCWyjxw-h4HqE8Vgy0Milz8TfxSHFJA1wvRqE6BaFkPom1M2z-Dhlw8L5VDA"
+=======
+  ],
+  "signature": {
+    "algorithm": "Ed25519",
+    "kid": "registry-root-2026-03",
+    "value": "H2bEFY7O5DtMqk0ntp9lc1SflWNnUnbFs9etxvG7LlN3KYD0-UDXz_3wPDXyZrKBz_dwRQpJNQ9NwWfTnlX8BQ"
+  }
+>>>>>>> Stashed changes
 }

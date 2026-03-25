@@ -1,7 +1,8 @@
 // sdk/typescript/src/registry.ts
 
-import type { RegistryManifest, RevocationList, AttestationClaims, VerificationResult, PublicKey } from './types';
+import type { RegistryManifest, RevocationList, VerificationResult } from './types';
 import { verifyAttestation } from './verify';
+import { OpenAgentTrustRegistryError, verifyRegistryArtifacts } from './registry-artifacts';
 
 export class OpenAgentTrustRegistry {
   private mirrorUrl: string;
@@ -36,18 +37,19 @@ export class OpenAgentTrustRegistry {
       ]);
 
       if (!manifestRes.ok || !revocationsRes.ok) {
-        throw new Error(`Failed to fetch registry state: ${manifestRes.status} / ${revocationsRes.status}`);
+        throw new OpenAgentTrustRegistryError(
+          'fetch_failed',
+          `Failed to fetch registry state: ${manifestRes.status} / ${revocationsRes.status}`
+        );
       }
 
-      this.manifest = await manifestRes.json();
-      this.revocations = await revocationsRes.json();
+      const manifest = await manifestRes.json();
+      const revocations = await revocationsRes.json();
+      const verifiedState = verifyRegistryArtifacts(manifest, revocations);
+
+      this.manifest = verifiedState.manifest;
+      this.revocations = verifiedState.revocations;
       this.lastFetchTime = Date.now();
-      
-      // TODO(security): Manifest signature verification is intentionally deferred.
-      // Once the root key ceremony is complete (see docs/multi-sig-ceremony.md),
-      // this client MUST verify the manifest's Ed25519 signature against the
-      // published root public key before trusting any registry data.
-      // Without this check, a compromised mirror could serve a tampered manifest.
 
     } catch (err) {
       console.error('[OpenAgentTrustRegistry] Failed to refresh state', err);
@@ -74,8 +76,12 @@ export class OpenAgentTrustRegistry {
     }
 
     if (!this.manifest || !this.revocations) {
-        throw new Error('Registry state not loaded');
+        throw new OpenAgentTrustRegistryError('registry_not_loaded', 'Registry state not loaded');
     }
+
+    const verifiedState = verifyRegistryArtifacts(this.manifest, this.revocations);
+    this.manifest = verifiedState.manifest;
+    this.revocations = verifiedState.revocations;
 
     return verifyAttestation(
         attestationJws, 

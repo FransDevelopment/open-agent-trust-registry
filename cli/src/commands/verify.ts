@@ -1,4 +1,4 @@
-import { OpenAgentTrustRegistry } from '@open-agent-trust/registry';
+import { OpenAgentTrustRegistry, OpenAgentTrustRegistryError } from '../../../sdk/typescript/src';
 
 export const verify = async (attestation: string, options: { audience: string; mirror: string }) => {
     try {
@@ -26,6 +26,11 @@ export const verify = async (attestation: string, options: { audience: string; m
             process.exit(1);
         }
     } catch (err: any) {
+        if (err instanceof OpenAgentTrustRegistryError) {
+            console.error(`\n❌ Registry state rejected: ${err.code}`);
+            console.error(err.message);
+            process.exit(1);
+        }
         console.error(`\n❌ Verification engine failure: ${err.message}`);
         process.exit(1);
     }

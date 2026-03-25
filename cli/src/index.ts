@@ -53,8 +53,8 @@ program
 
 program
   .command('compile')
-  .description('Compiles and signs the final manifest.json from the registry folder')
-  .requiredOption('-p, --private-key <key>', 'Ed25519 private key to sign the manifest')
+  .description('Compiles and signs manifest.json and revocations.json from the registry folder')
+  .requiredOption('-p, --private-key <path>', 'Path to the Ed25519 root private key seed file')
   .action(compile);
 
 program

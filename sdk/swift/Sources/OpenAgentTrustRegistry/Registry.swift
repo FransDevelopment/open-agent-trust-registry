@@ -36,10 +36,14 @@ public class OpenAgentTrustRegistryClient {
               let httpRevocations = revocationsResponse as? HTTPURLResponse, httpRevocations.statusCode == 200 else {
             throw OpenAgentTrustRegistryError.fetchFailed("Failed to fetch remote registry state (non-200 HTTP response).")
         }
-        
-        let decoder = JSONDecoder()
-        manifest = try decoder.decode(RegistryManifest.self, from: manifestData)
-        revocations = try decoder.decode(RevocationList.self, from: revocationsData)
+
+        let verifiedArtifacts = try RegistryArtifactVerifier.verifyArtifacts(
+            manifestData: manifestData,
+            revocationsData: revocationsData
+        )
+
+        manifest = verifiedArtifacts.manifest
+        revocations = verifiedArtifacts.revocations
         lastFetchTime = Date()
     }
     
@@ -54,7 +58,12 @@ public class OpenAgentTrustRegistryClient {
         guard let manifest = manifest, let revocations = revocations else {
             throw OpenAgentTrustRegistryError.registryNotLoaded
         }
-        
+
+        _ = try RegistryArtifactVerifier.verifyArtifacts(
+            manifest: manifest,
+            revocations: revocations
+        )
+
         return Verification.verifyAttestation(
             attestationJws: attestationJws,
             manifest: manifest,

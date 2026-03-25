@@ -1,8 +1,7 @@
 // sdk/typescript/src/verify.ts
 
 import * as jose from 'jose';
-import * as ed from '@noble/ed25519';
-import type { RegistryManifest, RevocationList, VerificationResult, AttestationClaims, PublicKey, IssuerEntry } from './types';
+import type { RegistryManifest, RevocationList, VerificationResult, AttestationClaims } from './types';
 
 /**
  * Executes the 14-step Verification Protocol to assess an agent attestation.

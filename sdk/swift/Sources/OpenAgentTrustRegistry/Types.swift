@@ -103,6 +103,41 @@ public struct RegistrySignature: Codable {
     public let value: String
 }
 
+public enum RootKeyStatus: String, Codable {
+    case active
+    case retired
+}
+
+public struct RootKeyEntry: Codable {
+    public let kid: String
+    public let algorithm: KeyAlgorithm
+    public let publicKey: String
+    public let status: RootKeyStatus
+    public let notBefore: String
+    public let notAfter: String?
+
+    enum CodingKeys: String, CodingKey {
+        case kid, algorithm, status
+        case publicKey = "public_key"
+        case notBefore = "not_before"
+        case notAfter = "not_after"
+    }
+}
+
+public struct RootKeySet: Codable {
+    public let schemaVersion: String
+    public let registryId: String
+    public let generatedAt: String
+    public let keys: [RootKeyEntry]
+
+    enum CodingKeys: String, CodingKey {
+        case schemaVersion = "schema_version"
+        case registryId = "registry_id"
+        case generatedAt = "generated_at"
+        case keys
+    }
+}
+
 public struct RegistryManifest: Codable {
     public let schemaVersion: String
     public let registryId: String
@@ -155,7 +190,7 @@ public struct RevocationList: Codable {
     public let expiresAt: String
     public let revokedKeys: [RevokedKey]
     public let revokedIssuers: [RevokedIssuer]
-    public let signature: RegistrySignature?
+    public let signature: RegistrySignature
 
     enum CodingKeys: String, CodingKey {
         case schemaVersion = "schema_version"

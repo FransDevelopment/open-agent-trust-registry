@@ -15,14 +15,16 @@ let package = Package(
             targets: ["OpenAgentTrustRegistry"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "4.0.0"),
-        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0")
+        .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "4.0.0")
     ],
     targets: [
         .target(
             name: "OpenAgentTrustRegistry",
             dependencies: [
-                .product(name: "JWTKit", package: "jwt-kit")
+                .product(name: "Crypto", package: "swift-crypto")
+            ],
+            resources: [
+                .process("Resources")
             ]
         ),
         .testTarget(

@@ -7,7 +7,7 @@ The Open Agent Trust Registry operates two separate revocation tracks:
 
 ## The Revocation List
 
-While the main registry manifest (`registry.json`) is designed for infrequent changes (updated roughly hourly), the highly specific `revocations.json` is updated frequently (every 5 minutes or less upon an emergency event).
+While the main registry manifest (`registry.json`) is recompiled on every issuer or revocation change (and on a 50-minute cron as a safety net), the `revocations.json` file is the fast-path for emergency revocations. Changes to `revocations.json` trigger an immediate manifest recompilation on merge to main.
 
 ```json
 {

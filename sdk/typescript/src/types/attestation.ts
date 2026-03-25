@@ -42,3 +42,11 @@ export interface VerificationResult {
   issuer?: import('./registry').IssuerEntry;
   claims?: AttestationClaims;
 }
+
+export type RegistryStateErrorCode =
+  | 'invalid_registry_signature'
+  | 'stale_registry_state'
+  | 'malformed_registry_state'
+  | 'unknown_root_key'
+  | 'fetch_failed'
+  | 'registry_not_loaded';

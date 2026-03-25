@@ -59,6 +59,22 @@ export interface RegistrySignature {
   value: string;
 }
 
+export interface RootKeyEntry {
+  kid: string;
+  algorithm: 'Ed25519';
+  public_key: string;
+  status: 'active' | 'retired';
+  not_before: string;
+  not_after: string | null;
+}
+
+export interface RootKeySet {
+  schema_version: string;
+  registry_id: string;
+  generated_at: string;
+  keys: RootKeyEntry[];
+}
+
 export interface RegistryManifest {
   schema_version: string;
   registry_id: string;
@@ -88,5 +104,5 @@ export interface RevocationList {
   expires_at: string;
   revoked_keys: RevokedKey[];
   revoked_issuers: RevokedIssuer[];
-  signature?: RegistrySignature;
+  signature: RegistrySignature;
 }
