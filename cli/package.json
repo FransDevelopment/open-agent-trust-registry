@@ -1,6 +1,6 @@
 {
   "name": "@open-agent-trust/cli",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "CLI utilities for the Open Agent Trust Registry",
   "license": "MIT",
   "repository": {

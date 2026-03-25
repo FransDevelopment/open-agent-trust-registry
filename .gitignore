@@ -11,3 +11,4 @@ build/
 xcuserdata/
 .swiftpm/
 *.key
+PRODUCTION_CHECKLIST.md
