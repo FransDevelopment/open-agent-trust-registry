@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-25
+
+### Added
+- `submit` CLI command (`npx @open-agent-trust/cli submit`) for automated, secure Pull Request submission of registry entries and proofs directly to the global registry.
+
+### Security
+- Fixed a critical JavaScript Injection Remote Code Execution (RCE) vulnerability in the GitHub Action verification pipeline.
+- Hardened the auto-merge CI pipeline against Issuer Identity Hijacking (Account Takeover) by enforcing precise dual-anchor modification constraints: preventing `website` and `issuer_id` changes from being auto-merged, while seamlessly preserving self-serve key rotations and revocations.
+
 ## [1.0.1] - 2026-03-25
 
 ### Fixed

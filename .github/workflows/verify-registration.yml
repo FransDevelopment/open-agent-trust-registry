@@ -89,6 +89,8 @@ jobs:
         if: steps.detect.outputs.issuer_files != ''
         id: verify
         uses: actions/github-script@v7
+        env:
+          ISSUER_FILES: ${{ steps.detect.outputs.issuer_files }}
         with:
           script: |
             const fs = require('fs');
@@ -102,7 +104,7 @@ jobs:
               'status', 'added_at', 'last_verified', 'public_keys', 'capabilities'
             ];
 
-            const issuerFiles = '${{ steps.detect.outputs.issuer_files }}'.trim().split(/\s+/).filter(Boolean);
+            const issuerFiles = process.env.ISSUER_FILES.trim().split(/\s+/).filter(Boolean);
             const results = [];
             let allPassed = true;
 
@@ -138,6 +140,31 @@ jobs:
                 // issuer_id format
                 if (!ISSUER_ID_PATTERN.test(issuer.issuer_id || '')) {
                   result.errors.push(`issuer_id must be lowercase alphanumeric and hyphens only`);
+                }
+
+                // ── Precise Modification Control ──
+                // Determine if this is a modification. If so, read the base branch version.
+                // We allow self-serve key rotations (adding/revoking) but strictly forbid 
+                // changing the `website` or `issuer_id` to prevent domain hijack takeovers.
+                let baseIssuer = null;
+                try {
+                  const execSync = require('child_process').execSync;
+                  // Pull from the checkout's FETCH_HEAD or origin/main
+                  const baseRaw = execSync(`git show origin/main:${file} 2>/dev/null`).toString();
+                  if (baseRaw) {
+                    baseIssuer = JSON.parse(baseRaw);
+                  }
+                } catch (e) {
+                  // File did not exist in base (it's a strictly new registration). Safe.
+                }
+
+                if (baseIssuer) {
+                  if (baseIssuer.website !== issuer.website) {
+                    result.errors.push(`Auto-merge blocked: Modifying the website field requires manual maintainer approval. (Attempted change from ${baseIssuer.website} to ${issuer.website})`);
+                  }
+                  if (baseIssuer.issuer_id !== issuer.issuer_id) {
+                    result.errors.push(`Auto-merge blocked: Modifying issuer_id is not permitted.`);
+                  }
                 }
 
                 // At least one active Ed25519 key

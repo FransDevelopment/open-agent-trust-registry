@@ -119,13 +119,19 @@ npx @open-agent-trust/cli prove \
 
 This creates `registry/proofs/my-runtime.proof` — a cryptographic proof that you control the private key matching your registration's public key. The private key is used for signing but **never appears** in the proof file. See [spec 11](spec/11-proof-of-key-ownership.md) for the format specification.
 
-### 5. Submit your Pull Request
+### 5. Submit your Registration
 
-Open a PR against this repository containing exactly two files:
-- `registry/issuers/my-runtime.json` — your issuer entry from Step 2
-- `registry/proofs/my-runtime.proof` — your proof from Step 4
+Use the automated CLI command to submit your registration directly to the global registry. This securely branches, commits via the Git Tree API, and opens a Pull Request on your behalf:
+
+```bash
+npx @open-agent-trust/cli submit \
+  --issuer-id my-runtime \
+  --github-token <YOUR_GITHUB_TOKEN>
+```
 
 **Automated verification (Tier 1):** The CI pipeline checks three things — valid Ed25519 key, proof-of-key-ownership signature, and domain verification. If all three pass, the PR is auto-merged. No human approval required. See [GOVERNANCE.md](GOVERNANCE.md) for the full tiered model.
+
+**Self-Serve Key Rotation:** You can use this same process to self-revoke or rotate a compromised key. The registry enforces a strict dual-anchor security model: auto-merges for modifications are cryptographically permitted *only* if your `website` and `issuer_id` remain unchanged. This definitively prevents domain hijacking takeovers while simultaneously preserving your agency for immediate incident response.
 
 ### 6. Issue and verify attestations
 

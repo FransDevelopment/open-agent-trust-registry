@@ -62,12 +62,12 @@ export const prove = async (options: {
         console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
 
         console.log(`Next steps:\n`);
-        console.log(`  1. Ensure your issuer JSON is at registry/issuers/${options.issuerId}.json`);
+        console.log(`  1. Ensure your issuer JSON is at ./${options.issuerId}.json`);
+        console.log(`     (or at a custom path you can pass to submit)\n`);
         console.log(`  2. Ensure your domain verification is live at:`);
-        console.log(`     https://yourdomain.com/.well-known/agent-trust.json\n`);
-        console.log(`  3. Submit a Pull Request with both files:`);
-        console.log(`     - registry/issuers/${options.issuerId}.json`);
-        console.log(`     - registry/proofs/${options.issuerId}.proof\n`);
+        console.log(`     https://yourdomain.com/.well-known/agent.json\n`);
+        console.log(`  3. Submit your registration to the trust registry:`);
+        console.log(`     npx @open-agent-trust/cli submit --issuer-id ${options.issuerId}\n`);
         console.log(`  The CI pipeline will verify your proof, check your domain,`);
         console.log(`  and auto-merge if all checks pass.\n`);
 

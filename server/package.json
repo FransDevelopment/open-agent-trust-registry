@@ -1,6 +1,6 @@
 {
   "name": "@open-agent-trust/server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A reference caching mirror server for the Open Agent Trust Registry.",
   "main": "src/index.ts",
   "license": "MIT",

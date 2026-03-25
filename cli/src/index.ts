@@ -6,6 +6,7 @@ import { verify } from './commands/verify';
 import { issue } from './commands/issue';
 import { compile } from './commands/compile';
 import { prove } from './commands/prove';
+import { submit } from './commands/submit';
 
 const program = new Command();
 
@@ -64,5 +65,15 @@ program
   .requiredOption('-p, --private-key <path>', 'Path to your .private.pem key file')
   .option('-o, --out-file <path>', 'Output path for the proof file')
   .action(prove);
+
+program
+  .command('submit')
+  .description('Submit your issuer registration and proof as a Pull Request to the global trust registry')
+  .requiredOption('-i, --issuer-id <string>', 'Your globally unique issuer identifier')
+  .option('-t, --github-token <string>', 'GitHub personal access token (or set GITHUB_TOKEN env var)')
+  .option('--json-file <path>', 'Path to the issuer JSON file (default: ./<issuer-id>.json)')
+  .option('--proof-file <path>', 'Path to the proof file (default: ./registry/proofs/<issuer-id>.proof)')
+  .option('--dry-run', 'Validate files locally without submitting to GitHub')
+  .action(submit);
 
 program.parse(process.argv);

@@ -52,5 +52,6 @@ export const register = async (options: RegisterOptions) => {
 
     console.log(`✅ Draft Issuer Entry generated at: ${outPath}`);
     console.log(`\nPlease review the \"capabilities\" block to ensure it matches your runtime's exact profile.`);
-    console.log(`When ready, submit this file as a Pull Request to 'registry/issuers/' in the open source repository.`);
+    console.log(`When ready, generate your proof with 'prove' and then submit both files as a Pull Request using:`);
+    console.log(`  npx @open-agent-trust/cli submit --issuer-id ${options.issuerId}`);
 };
