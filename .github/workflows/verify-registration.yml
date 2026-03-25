@@ -28,13 +28,13 @@ jobs:
       # The workflow YAML itself is from the base branch (pull_request_target
       # guarantees this), so the PR cannot modify the verification logic.
       - name: Checkout PR
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
 

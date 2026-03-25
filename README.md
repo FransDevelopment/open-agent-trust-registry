@@ -1,5 +1,10 @@
 # Open Agent Trust Registry
 
+[![Registry Compiler](https://github.com/FransDevelopment/open-agent-trust-registry/actions/workflows/manifest-compiler.yml/badge.svg)](https://github.com/FransDevelopment/open-agent-trust-registry/actions/workflows/manifest-compiler.yml)
+[![Verify Registration](https://github.com/FransDevelopment/open-agent-trust-registry/actions/workflows/verify-registration.yml/badge.svg)](https://github.com/FransDevelopment/open-agent-trust-registry/actions/workflows/verify-registration.yml)
+[![npm](https://img.shields.io/npm/v/@open-agent-trust/cli)](https://www.npmjs.com/package/@open-agent-trust/cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > The open root-of-trust for agent identity on the internet.
 
 A public, federated registry of trusted attestation issuers — the agent runtimes authorized to vouch for agents acting on behalf of humans. Services verify agent attestations against this registry to determine if the issuing runtime is legitimate.
