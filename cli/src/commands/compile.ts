@@ -24,7 +24,7 @@ export async function compile(options: { privateKey: string }) {
 
         const timestamp = new Date().toISOString();
         const manifestExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-        const revocationExpiry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+        const revocationExpiry = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
 
         const privateKeyPath = resolve(process.cwd(), options.privateKey);
         const privateSeed = (await readFile(privateKeyPath, 'utf8')).trim();

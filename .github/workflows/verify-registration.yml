@@ -255,6 +255,30 @@ jobs:
                 // then fall back to agent-trust.json for backwards compatibility.
                 const website = issuer.website.replace(/\/+$/, '');
 
+                // SSRF Security Mitigation: Validate scheme and hostname
+                try {
+                  const parsedUrl = new URL(website);
+                  if (parsedUrl.protocol !== 'https:') {
+                    result.errors.push(`Registration rejected: Website must strictly use HTTPS.`);
+                    results.push(result);
+                    allPassed = false;
+                    continue;
+                  }
+                  const host = parsedUrl.hostname;
+                  const rawIpRegex = /^(\d{1,3}\.){3}\d{1,3}$|^\[?[A-Fa-f0-9:]+\]?$/;
+                  if (host === 'localhost' || host.endsWith('.local') || rawIpRegex.test(host)) {
+                    result.errors.push(`Registration rejected: Provided website (${host}) is an internal address.`);
+                    results.push(result);
+                    allPassed = false;
+                    continue;
+                  }
+                } catch (e) {
+                  result.errors.push(`Registration rejected: Website field is not a valid URL format.`);
+                  results.push(result);
+                  allPassed = false;
+                  continue;
+                }
+
                 let domainData;
                 let verificationSource = 'unknown';
 
