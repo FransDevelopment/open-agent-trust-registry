@@ -52,7 +52,9 @@ jobs:
             echo "Error: ROOT_PRIVATE_KEY secret is not set!"
             exit 1
           fi
-          npm run start -- compile --private-key "$SIGNING_KEY"
+          echo "$SIGNING_KEY" > /tmp/root-private-key.txt
+          npm run start -- compile --private-key /tmp/root-private-key.txt
+          rm -f /tmp/root-private-key.txt
 
       - name: Commit and Push Updated Manifest
         uses: stefanzweifel/git-auto-commit-action@v5
