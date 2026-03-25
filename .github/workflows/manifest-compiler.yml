@@ -60,4 +60,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: auto-compile latest manifest.json [skip ci]"
-          file_pattern: "registry/manifest.json"
+          file_pattern: "registry/manifest.json registry/revocations.json"
