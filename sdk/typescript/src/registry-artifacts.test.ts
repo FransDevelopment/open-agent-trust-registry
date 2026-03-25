@@ -32,10 +32,13 @@ describe('registry artifact verification', () => {
   it('rejects an expired revocation list', () => {
     const manifest = loadJson<RegistryManifest>('../../registry/manifest.json');
     const revocations = loadJson<RevocationList>('../../registry/revocations.json');
-    const now = new Date(new Date(revocations.expires_at).getTime() + 1000);
+    // Use a revocation list with a short expiry so it expires before the manifest
+    const expiredRevocations = structuredClone(revocations);
+    expiredRevocations.expires_at = manifest.generated_at;
+    const now = new Date(new Date(expiredRevocations.expires_at).getTime() + 1000);
 
-    expect(() => verifyRegistryArtifacts(manifest, revocations, { now })).toThrowError(OpenAgentTrustRegistryError);
-    expect(() => verifyRegistryArtifacts(manifest, revocations, { now })).toThrow(/revocations is expired/);
+    expect(() => verifyRegistryArtifacts(manifest, expiredRevocations, { now })).toThrowError(OpenAgentTrustRegistryError);
+    expect(() => verifyRegistryArtifacts(manifest, expiredRevocations, { now })).toThrow(/revocations is expired/);
   });
 
   it('rejects a tampered manifest signature', () => {
