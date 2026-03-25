@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/open-agent-trust/open-agent-trust-registry.git"
+    "url": "https://github.com/FransDevelopment/open-agent-trust-registry.git"
   },
   "author": "Open Agent Trust Registry Contributors",
   "bin": {
