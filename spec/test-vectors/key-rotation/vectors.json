@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-25T14:07:47.659Z",
+  "generated_at": "2026-03-28T05:03:07.735Z",
   "description": "Key rotation test vectors for the Open Agent Trust Registry spec. Each vector contains real Ed25519 keys and signed JWTs.",
   "grace_period_days": 90,
   "vectors": [
@@ -15,7 +15,7 @@
         "security_contact": "security@test.example.com",
         "status": "active",
         "added_at": "2025-12-01T00:00:00Z",
-        "last_verified": "2026-03-25T14:07:47.657Z",
+        "last_verified": "2026-03-28T05:03:07.730Z",
         "capabilities": {
           "supervision_model": "tiered",
           "audit_logging": true,
@@ -28,20 +28,20 @@
           {
             "kid": "key-2025-12",
             "algorithm": "Ed25519",
-            "public_key": "-A4ies6twpZOsGof9KlV-qkvYNdlm34Wfq1oYHY0l10",
+            "public_key": "ACf1hk02se68hDLpcEfFGp6GYOUfaV772ovgNvMndgc",
             "status": "deprecated",
             "issued_at": "2025-12-01T00:00:00Z",
             "expires_at": "2027-12-01T00:00:00Z",
-            "deprecated_at": "2026-02-23T14:07:47.657Z",
+            "deprecated_at": "2026-02-26T05:03:07.731Z",
             "revoked_at": null
           },
           {
             "kid": "key-2026-03",
             "algorithm": "Ed25519",
-            "public_key": "S8A1aNR1RnlVwVxU-L6bdlfN3QagxZf3fNV3d77OSdY",
+            "public_key": "4Rgw8x6SKUrawakqWuCZF1FjFU0DPRDODuTe7ZsfVEE",
             "status": "active",
-            "issued_at": "2026-02-23T14:07:47.657Z",
-            "expires_at": "2028-02-23T14:07:47.657Z",
+            "issued_at": "2026-02-26T05:03:07.731Z",
+            "expires_at": "2028-02-26T05:03:07.731Z",
             "deprecated_at": null,
             "revoked_at": null
           }
@@ -50,14 +50,14 @@
       "attestations": [
         {
           "description": "Signed with deprecated key (within grace period)",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI1LTEyIiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.IjCnjqhvg9KBvQKLGnZcwYZU3N0x17vZG6BV-1xXv9oLyWgl6C2_c4QGORNLnVSmehwQr4uUoQeM0TPhbZr_Cw",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI1LTEyIiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.jd2cWYy4-V5rCRHeNmpBEne_StziROkrLht8vHOX-BdAkvZfnU4-G04xqH6-ctObkQl_gp6chqUkkdq_oFgwBQ",
           "kid_used": "key-2025-12",
           "expected_result": "pass",
           "expected_reason": "Key is deprecated but within the 90-day grace period. Signature is mathematically valid."
         },
         {
           "description": "Signed with new active key",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI2LTAzIiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.gI5oiInjrXHkSggMl9i22EQB6foFMYT6r_zWW9Mv1pXqzYh9F0RoGv1C-lpgs7_cOUvK8NQ2LSGLe3xIFVItAw",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI2LTAzIiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.UDIdWyvs627pZ9TSQo7I3QXklgBu6cFF6-srZAiWj8L_wqwp-6nRslO7O3595dOC_HfRVd7dBgOJh01tFH0dDg",
           "kid_used": "key-2026-03",
           "expected_result": "pass",
           "expected_reason": "Key is active. Signature is mathematically valid."
@@ -75,7 +75,7 @@
         "security_contact": "security@test.example.com",
         "status": "active",
         "added_at": "2025-06-01T00:00:00Z",
-        "last_verified": "2026-03-25T14:07:47.657Z",
+        "last_verified": "2026-03-28T05:03:07.732Z",
         "capabilities": {
           "supervision_model": "tiered",
           "audit_logging": true,
@@ -88,20 +88,20 @@
           {
             "kid": "key-2025-06",
             "algorithm": "Ed25519",
-            "public_key": "-A4ies6twpZOsGof9KlV-qkvYNdlm34Wfq1oYHY0l10",
+            "public_key": "ACf1hk02se68hDLpcEfFGp6GYOUfaV772ovgNvMndgc",
             "status": "deprecated",
             "issued_at": "2025-06-01T00:00:00Z",
             "expires_at": "2027-06-01T00:00:00Z",
-            "deprecated_at": "2025-11-25T14:07:47.657Z",
+            "deprecated_at": "2025-11-28T05:03:07.732Z",
             "revoked_at": null
           },
           {
             "kid": "key-2025-12",
             "algorithm": "Ed25519",
-            "public_key": "S8A1aNR1RnlVwVxU-L6bdlfN3QagxZf3fNV3d77OSdY",
+            "public_key": "4Rgw8x6SKUrawakqWuCZF1FjFU0DPRDODuTe7ZsfVEE",
             "status": "active",
-            "issued_at": "2025-11-25T14:07:47.657Z",
-            "expires_at": "2027-11-15T14:07:47.657Z",
+            "issued_at": "2025-11-28T05:03:07.732Z",
+            "expires_at": "2027-11-18T05:03:07.732Z",
             "deprecated_at": null,
             "revoked_at": null
           }
@@ -110,7 +110,7 @@
       "attestations": [
         {
           "description": "Signed with deprecated key (grace period expired)",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI1LTA2IiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.XK3mDX6oYMyAz36xzTPY-5S6A5ufjoNiarvPmqk8YN_PCxP49mvxm0XJ95kOEpXCL-OJKZJK2W7ZGDLYyYoBDQ",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI1LTA2IiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.3YyeXivULNklmx1jlDMSJziUO4iWhJ3lrM_Wybxa-P11hGrqo27G4w0sk1ZZHsRrf23-hXjwugz84miSWQhWCQ",
           "kid_used": "key-2025-06",
           "expected_result": "fail",
           "expected_reason": "Key was deprecated 120 days ago. The 90-day grace period has expired. Implementations MUST reject."
@@ -128,7 +128,7 @@
         "security_contact": "security@test.example.com",
         "status": "active",
         "added_at": "2025-06-01T00:00:00Z",
-        "last_verified": "2026-03-25T14:07:47.658Z",
+        "last_verified": "2026-03-28T05:03:07.733Z",
         "capabilities": {
           "supervision_model": "tiered",
           "audit_logging": true,
@@ -141,20 +141,20 @@
           {
             "kid": "key-compromised",
             "algorithm": "Ed25519",
-            "public_key": "-A4ies6twpZOsGof9KlV-qkvYNdlm34Wfq1oYHY0l10",
+            "public_key": "ACf1hk02se68hDLpcEfFGp6GYOUfaV772ovgNvMndgc",
             "status": "revoked",
             "issued_at": "2025-06-01T00:00:00Z",
             "expires_at": "2027-06-01T00:00:00Z",
             "deprecated_at": null,
-            "revoked_at": "2026-03-24T14:07:47.658Z"
+            "revoked_at": "2026-03-27T05:03:07.733Z"
           },
           {
             "kid": "key-2026-03",
             "algorithm": "Ed25519",
-            "public_key": "S8A1aNR1RnlVwVxU-L6bdlfN3QagxZf3fNV3d77OSdY",
+            "public_key": "4Rgw8x6SKUrawakqWuCZF1FjFU0DPRDODuTe7ZsfVEE",
             "status": "active",
-            "issued_at": "2026-03-24T14:07:47.658Z",
-            "expires_at": "2028-02-23T14:07:47.658Z",
+            "issued_at": "2026-03-27T05:03:07.733Z",
+            "expires_at": "2028-02-26T05:03:07.733Z",
             "deprecated_at": null,
             "revoked_at": null
           }
@@ -163,7 +163,7 @@
       "attestations": [
         {
           "description": "Signed with revoked key",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS1jb21wcm9taXNlZCIsImlzcyI6InRlc3QtaXNzdWVyIiwidHlwIjoiYWdlbnQtYXR0ZXN0YXRpb24rand0In0.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.UCQ18AMvjGFBPynumzExpaG8ZphvyTwTmPBusTJyM3KOIq2MZ2_5bzMMRDDVyf88sEqxXDmg3NQAxbSrHLV9CA",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS1jb21wcm9taXNlZCIsImlzcyI6InRlc3QtaXNzdWVyIiwidHlwIjoiYWdlbnQtYXR0ZXN0YXRpb24rand0In0.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.7sNTS0qnV_DDOqMUuOxElACJDDzSSWjODA73djf1HWt-2jqK_GRMBhmhSYRGQNfVkNwfg69pDDQsVl8v7skACQ",
           "kid_used": "key-compromised",
           "expected_result": "fail",
           "expected_reason": "Key has revoked_at set. No grace period applies to revoked keys. Implementations MUST reject immediately."
@@ -181,7 +181,7 @@
         "security_contact": "security@test.example.com",
         "status": "active",
         "added_at": "2025-06-01T00:00:00Z",
-        "last_verified": "2026-03-25T14:07:47.659Z",
+        "last_verified": "2026-03-28T05:03:07.734Z",
         "capabilities": {
           "supervision_model": "tiered",
           "audit_logging": true,
@@ -194,20 +194,20 @@
           {
             "kid": "key-primary",
             "algorithm": "Ed25519",
-            "public_key": "-A4ies6twpZOsGof9KlV-qkvYNdlm34Wfq1oYHY0l10",
+            "public_key": "ACf1hk02se68hDLpcEfFGp6GYOUfaV772ovgNvMndgc",
             "status": "active",
             "issued_at": "2025-06-01T00:00:00Z",
-            "expires_at": "2027-03-25T14:07:47.659Z",
+            "expires_at": "2027-03-28T05:03:07.734Z",
             "deprecated_at": null,
             "revoked_at": null
           },
           {
             "kid": "key-secondary",
             "algorithm": "Ed25519",
-            "public_key": "S8A1aNR1RnlVwVxU-L6bdlfN3QagxZf3fNV3d77OSdY",
+            "public_key": "4Rgw8x6SKUrawakqWuCZF1FjFU0DPRDODuTe7ZsfVEE",
             "status": "active",
-            "issued_at": "2025-12-25T14:07:47.659Z",
-            "expires_at": "2027-03-25T14:07:47.659Z",
+            "issued_at": "2025-12-28T05:03:07.734Z",
+            "expires_at": "2027-03-28T05:03:07.734Z",
             "deprecated_at": null,
             "revoked_at": null
           }
@@ -216,14 +216,14 @@
       "attestations": [
         {
           "description": "Signed with primary active key",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS1wcmltYXJ5IiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.foy7ErTwFUdsbDgeDhj3JwNHx2eZAeXDsu4GjgGJJarzUiPdhZfCUH7FiDJ7VvJqkcgnRZMU7huGiJorYAhrAA",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS1wcmltYXJ5IiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.lIaiyJfQj1cq0hQ6v01vpJnueWDRD2IcCKEwo33pgo8AFcVEX-8I_4CXRoCihQ5XRCPorWDCyobabU-ExAWyAg",
           "kid_used": "key-primary",
           "expected_result": "pass",
           "expected_reason": "Key is active. Signature is mathematically valid."
         },
         {
           "description": "Signed with secondary active key",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS1zZWNvbmRhcnkiLCJpc3MiOiJ0ZXN0LWlzc3VlciIsInR5cCI6ImFnZW50LWF0dGVzdGF0aW9uK2p3dCJ9.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.WG_vlq8GQt2ZeWFAHicDdVKLFqBol2ntGGSs9pX_5PiawKh4vNG_N1C7Kc6Qmlb48q2wgmE_L1ljDklvZmTWCg",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS1zZWNvbmRhcnkiLCJpc3MiOiJ0ZXN0LWlzc3VlciIsInR5cCI6ImFnZW50LWF0dGVzdGF0aW9uK2p3dCJ9.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.pUl9AUyLrz6uj7BbYp5lwQLcsc7Mgo8JgFZH4e21UJA52SL4TnUeuQoSmm7ULr4in6BBn1Gouv-5PSXRKKnvBA",
           "kid_used": "key-secondary",
           "expected_result": "pass",
           "expected_reason": "Key is active. Signature is mathematically valid."
@@ -241,7 +241,7 @@
         "security_contact": "security@test.example.com",
         "status": "active",
         "added_at": "2025-06-01T00:00:00Z",
-        "last_verified": "2026-03-25T14:07:47.659Z",
+        "last_verified": "2026-03-28T05:03:07.735Z",
         "capabilities": {
           "supervision_model": "tiered",
           "audit_logging": true,
@@ -254,7 +254,7 @@
           {
             "kid": "key-2025-12-restored",
             "algorithm": "Ed25519",
-            "public_key": "-A4ies6twpZOsGof9KlV-qkvYNdlm34Wfq1oYHY0l10",
+            "public_key": "ACf1hk02se68hDLpcEfFGp6GYOUfaV772ovgNvMndgc",
             "status": "active",
             "issued_at": "2025-12-01T00:00:00Z",
             "expires_at": "2027-12-01T00:00:00Z",
@@ -264,26 +264,26 @@
           {
             "kid": "key-2026-03-bad",
             "algorithm": "Ed25519",
-            "public_key": "zjmLfcYWZxdqxCXkNgGGUtJxKvY5QLCHnUgrjPuHpnA",
+            "public_key": "wNYxwmocv7fgQ0DI8ifoOq8XGRqV0co7lJ0HFFHUoRM",
             "status": "revoked",
-            "issued_at": "2026-03-11T14:07:47.659Z",
-            "expires_at": "2028-02-23T14:07:47.659Z",
+            "issued_at": "2026-03-14T05:03:07.735Z",
+            "expires_at": "2028-02-26T05:03:07.735Z",
             "deprecated_at": null,
-            "revoked_at": "2026-03-18T14:07:47.659Z"
+            "revoked_at": "2026-03-21T05:03:07.735Z"
           }
         ]
       },
       "attestations": [
         {
           "description": "Signed with revoked new key",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI2LTAzLWJhZCIsImlzcyI6InRlc3QtaXNzdWVyIiwidHlwIjoiYWdlbnQtYXR0ZXN0YXRpb24rand0In0.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.INMUrO21SangxRKFs2fI3nK1LdJz3ONQUox5kLydDbKDxagALvopERNA9K3vECYuDGZQd3PUOOhCVVq94my5CQ",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI2LTAzLWJhZCIsImlzcyI6InRlc3QtaXNzdWVyIiwidHlwIjoiYWdlbnQtYXR0ZXN0YXRpb24rand0In0.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.G6QDcDrv4ai3PbrOwZiwc29YbB1kQdCGYYb2GAq6BDEd_uFmQ3TV7d2kglyzlS7UrwAe0ekb5RpGpFL12hUNCA",
           "kid_used": "key-2026-03-bad",
           "expected_result": "fail",
           "expected_reason": "Key has revoked_at set. Revocation is immediate and permanent."
         },
         {
           "description": "Signed with restored old key",
-          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI1LTEyLXJlc3RvcmVkIiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ0NDc2NjcsImV4cCI6MTc3NDQ1MTI2Nywic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.Q7O5HCnxuVvYroYYvHZ8W7chjQt4wWb4C5SvC45F10-ICXjzor_M7U3Bv6cFJ2Q9C1csYpq66l88uLcsMghpDQ",
+          "token": "eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0yMDI1LTEyLXJlc3RvcmVkIiwiaXNzIjoidGVzdC1pc3N1ZXIiLCJ0eXAiOiJhZ2VudC1hdHRlc3RhdGlvbitqd3QifQ.eyJzdWIiOiJhZ2VudC10ZXN0LWluc3RhbmNlIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZXhhbXBsZS5jb20iLCJpYXQiOjE3NzQ2NzQxODcsImV4cCI6NDEwMjQ0NDc5OSwic2NvcGUiOlsicmVhZDpkYXRhIl0sImNvbnN0cmFpbnRzIjp7Im1heF9jb3N0X3VzZCI6NX0sInVzZXJfcHNldWRvbnltIjoidGVzdC1wc2V1ZG9ueW0iLCJydW50aW1lX3ZlcnNpb24iOiIxLjAuMCJ9.kbWJXNxZZciQ-YcGFDIQwiBkFSvAK_KOoUZ2Q8KneucC8fidx3usNSOFIBdlKoiga_EFHn3WjZTOPrm6XUEfDw",
           "kid_used": "key-2025-12-restored",
           "expected_result": "pass",
           "expected_reason": "Key is active (reactivated after rollback). deprecated_at cleared. Signature is mathematically valid."

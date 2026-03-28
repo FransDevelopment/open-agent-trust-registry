@@ -112,7 +112,7 @@ The vectors contain real Ed25519 keypairs and signed JWTs. To regenerate with fr
 ```bash
 cd sdk/typescript
 npm install
-node generate-vectors.mjs > ../../spec/test-vectors/key-rotation/vectors.json
+node ../../spec/test-vectors/key-rotation/generate-vectors.mjs > ../../spec/test-vectors/key-rotation/vectors.json
 ```
 
 The generator script is at `spec/test-vectors/key-rotation/generate-vectors.mjs`.

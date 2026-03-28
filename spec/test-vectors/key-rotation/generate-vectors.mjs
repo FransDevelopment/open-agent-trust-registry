@@ -24,12 +24,15 @@ async function exportKey(keypair) {
   return jwk.x; // base64url-encoded Ed25519 public key
 }
 
-async function signAttestation(keypair, iss, kid, aud, expOffset = 3600) {
+// Year 2099 exp so static test vectors remain usable long-term
+const FAR_FUTURE_EXP = Math.floor(new Date('2099-12-31T23:59:59Z').getTime() / 1000);
+
+async function signAttestation(keypair, iss, kid, aud) {
   return new jose.SignJWT({
     sub: 'agent-test-instance',
     aud,
     iat: unixTs(),
-    exp: unixTs(expOffset),
+    exp: FAR_FUTURE_EXP,
     scope: ['read:data'],
     constraints: { max_cost_usd: 5.0 },
     user_pseudonym: 'test-pseudonym',
