@@ -7,6 +7,9 @@ final class AgentTrustRegistryTests: XCTestCase {
     var validKeypair: Curve25519.Signing.PrivateKey!
     var revokedKeypair: Curve25519.Signing.PrivateKey!
     var expiredKeypair: Curve25519.Signing.PrivateKey!
+    var deprecatedKeypair: Curve25519.Signing.PrivateKey!
+    var secondActiveKeypair: Curve25519.Signing.PrivateKey!
+    var fastpathKeypair: Curve25519.Signing.PrivateKey!
 
     var manifest: RegistryManifest!
     var revocations: RevocationList!
@@ -15,10 +18,16 @@ final class AgentTrustRegistryTests: XCTestCase {
         validKeypair = Curve25519.Signing.PrivateKey()
         revokedKeypair = Curve25519.Signing.PrivateKey()
         expiredKeypair = Curve25519.Signing.PrivateKey()
+        deprecatedKeypair = Curve25519.Signing.PrivateKey()
+        secondActiveKeypair = Curve25519.Signing.PrivateKey()
+        fastpathKeypair = Curve25519.Signing.PrivateKey()
 
         let validPubKeyBase64 = validKeypair.publicKey.rawRepresentation.base64EncodedString()
         let revokedPubKeyBase64 = revokedKeypair.publicKey.rawRepresentation.base64EncodedString()
         let expiredPubKeyBase64 = expiredKeypair.publicKey.rawRepresentation.base64EncodedString()
+        let deprecatedPubKeyBase64 = deprecatedKeypair.publicKey.rawRepresentation.base64EncodedString()
+        let secondActivePubKeyBase64 = secondActiveKeypair.publicKey.rawRepresentation.base64EncodedString()
+        let fastpathPubKeyBase64 = fastpathKeypair.publicKey.rawRepresentation.base64EncodedString()
 
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -42,6 +51,61 @@ final class AgentTrustRegistryTests: XCTestCase {
             status: .active,
             issuedAt: isoFormatter.string(from: now.addingTimeInterval(-172800)),
             expiresAt: isoFormatter.string(from: now.addingTimeInterval(-86400)), // expired yesterday
+            deprecatedAt: nil,
+            revokedAt: nil
+        )
+
+        let deprecatedWithinGrace = PublicKeyEntry(
+            kid: "deprecated-within-grace",
+            algorithm: .ed25519,
+            publicKey: deprecatedPubKeyBase64,
+            status: .deprecated,
+            issuedAt: isoFormatter.string(from: now.addingTimeInterval(-86400 * 60)),
+            expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400 * 300)),
+            deprecatedAt: isoFormatter.string(from: now.addingTimeInterval(-86400 * 30)), // 30 days ago
+            revokedAt: nil
+        )
+
+        let deprecatedPastGrace = PublicKeyEntry(
+            kid: "deprecated-past-grace",
+            algorithm: .ed25519,
+            publicKey: deprecatedPubKeyBase64,
+            status: .deprecated,
+            issuedAt: isoFormatter.string(from: now.addingTimeInterval(-86400 * 200)),
+            expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400 * 100)),
+            deprecatedAt: isoFormatter.string(from: now.addingTimeInterval(-86400 * 120)), // 120 days ago
+            revokedAt: nil
+        )
+
+        let deprecatedNoTimestamp = PublicKeyEntry(
+            kid: "deprecated-no-timestamp",
+            algorithm: .ed25519,
+            publicKey: deprecatedPubKeyBase64,
+            status: .deprecated,
+            issuedAt: isoFormatter.string(from: now.addingTimeInterval(-86400 * 60)),
+            expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400 * 300)),
+            deprecatedAt: nil, // Missing — data integrity error
+            revokedAt: nil
+        )
+
+        let secondActiveKey = PublicKeyEntry(
+            kid: "second-active-key",
+            algorithm: .ed25519,
+            publicKey: secondActivePubKeyBase64,
+            status: .active,
+            issuedAt: isoFormatter.string(from: now),
+            expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400)),
+            deprecatedAt: nil,
+            revokedAt: nil
+        )
+
+        let fastpathKey = PublicKeyEntry(
+            kid: "fastpath-key",
+            algorithm: .ed25519,
+            publicKey: fastpathPubKeyBase64,
+            status: .active,
+            issuedAt: isoFormatter.string(from: now),
+            expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400)),
             deprecatedAt: nil,
             revokedAt: nil
         )
@@ -74,7 +138,7 @@ final class AgentTrustRegistryTests: XCTestCase {
             status: .active,
             addedAt: isoFormatter.string(from: now),
             lastVerified: isoFormatter.string(from: now),
-            publicKeys: [validKey1, expiredKey1],
+            publicKeys: [validKey1, expiredKey1, deprecatedWithinGrace, deprecatedPastGrace, deprecatedNoTimestamp, secondActiveKey, fastpathKey],
             capabilities: capabilities,
             endpoints: nil
         )
@@ -92,12 +156,34 @@ final class AgentTrustRegistryTests: XCTestCase {
             endpoints: nil
         )
 
+        let suspendedIssuer = IssuerEntry(
+            issuerId: "suspended-issuer",
+            displayName: "Suspended Issuer",
+            website: URL(string: "https://suspended.com")!,
+            securityContact: "sec@suspended.com",
+            status: .suspended,
+            addedAt: isoFormatter.string(from: now),
+            lastVerified: isoFormatter.string(from: now),
+            publicKeys: [PublicKeyEntry(
+                kid: "suspended-key-1",
+                algorithm: .ed25519,
+                publicKey: validPubKeyBase64,
+                status: .active,
+                issuedAt: isoFormatter.string(from: now),
+                expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400)),
+                deprecatedAt: nil,
+                revokedAt: nil
+            )],
+            capabilities: capabilities,
+            endpoints: nil
+        )
+
         manifest = RegistryManifest(
             schemaVersion: "1.0.0",
             registryId: "open-trust-registry",
             generatedAt: isoFormatter.string(from: now),
             expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400)),
-            entries: [validIssuer, revokedIssuer],
+            entries: [validIssuer, revokedIssuer, suspendedIssuer],
             signature: RegistrySignature(algorithm: .ed25519, kid: "root", value: "placeholder")
         )
 
@@ -105,7 +191,7 @@ final class AgentTrustRegistryTests: XCTestCase {
             schemaVersion: "1.0.0",
             generatedAt: isoFormatter.string(from: now),
             expiresAt: isoFormatter.string(from: now.addingTimeInterval(86400)),
-            revokedKeys: [],
+            revokedKeys: [RevokedKey(issuerId: "valid-issuer", kid: "fastpath-key", revokedAt: isoFormatter.string(from: now), reason: "key_compromise")],
             revokedIssuers: [RevokedIssuer(issuerId: "revoked-issuer", revokedAt: isoFormatter.string(from: now), reason: "policy_violation")],
             signature: RegistrySignature(algorithm: .ed25519, kid: "registry-root-2026-03", value: "placeholder")
         )
@@ -251,6 +337,56 @@ final class AgentTrustRegistryTests: XCTestCase {
         
         XCTAssertFalse(result.valid)
         XCTAssertEqual(result.reason, .nonceMismatch)
+    }
+
+    // --- Key Rotation & Grace Period Tests ---
+
+    func testDeprecatedKeyWithinGracePeriod() throws {
+        let token = try signToken(keypair: deprecatedKeypair, iss: "valid-issuer", kid: "deprecated-within-grace", aud: "https://api.service.com")
+        let result = Verification.verifyAttestation(attestationJws: token, manifest: manifest, revocations: revocations, expectedAudience: "https://api.service.com")
+
+        XCTAssertTrue(result.valid)
+        XCTAssertEqual(result.issuer?.issuerId, "valid-issuer")
+    }
+
+    func testDeprecatedKeyPastGracePeriod() throws {
+        let token = try signToken(keypair: deprecatedKeypair, iss: "valid-issuer", kid: "deprecated-past-grace", aud: "https://api.service.com")
+        let result = Verification.verifyAttestation(attestationJws: token, manifest: manifest, revocations: revocations, expectedAudience: "https://api.service.com")
+
+        XCTAssertFalse(result.valid)
+        XCTAssertEqual(result.reason, .gracePeriodExpired)
+    }
+
+    func testDeprecatedKeyMissingDeprecatedAt() throws {
+        let token = try signToken(keypair: deprecatedKeypair, iss: "valid-issuer", kid: "deprecated-no-timestamp", aud: "https://api.service.com")
+        let result = Verification.verifyAttestation(attestationJws: token, manifest: manifest, revocations: revocations, expectedAudience: "https://api.service.com")
+
+        XCTAssertFalse(result.valid)
+        XCTAssertEqual(result.reason, .gracePeriodExpired)
+    }
+
+    func testSuspendedIssuer() throws {
+        let token = try signToken(keypair: validKeypair, iss: "suspended-issuer", kid: "suspended-key-1", aud: "https://api.service.com")
+        let result = Verification.verifyAttestation(attestationJws: token, manifest: manifest, revocations: revocations, expectedAudience: "https://api.service.com")
+
+        XCTAssertFalse(result.valid)
+        XCTAssertEqual(result.reason, .suspendedIssuer)
+    }
+
+    func testMultipleActiveKeys() throws {
+        let token = try signToken(keypair: secondActiveKeypair, iss: "valid-issuer", kid: "second-active-key", aud: "https://api.service.com")
+        let result = Verification.verifyAttestation(attestationJws: token, manifest: manifest, revocations: revocations, expectedAudience: "https://api.service.com")
+
+        XCTAssertTrue(result.valid)
+        XCTAssertEqual(result.issuer?.issuerId, "valid-issuer")
+    }
+
+    func testRevocationFastPath() throws {
+        let token = try signToken(keypair: fastpathKeypair, iss: "valid-issuer", kid: "fastpath-key", aud: "https://api.service.com")
+        let result = Verification.verifyAttestation(attestationJws: token, manifest: manifest, revocations: revocations, expectedAudience: "https://api.service.com")
+
+        XCTAssertFalse(result.valid)
+        XCTAssertEqual(result.reason, .revokedKey)
     }
 
     func testCheckedInArtifactsVerifyWhenFresh() throws {

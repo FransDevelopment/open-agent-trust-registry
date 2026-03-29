@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Composable Trust Infrastructure for the Agent Internet</title>
+<style>
+@page {
+    size: letter;
+    margin: 1in 1in 1in 1in;
+}
+
+@media print {
+    body {
+        font-size: 11pt;
+    }
+    h1 {
+        font-size: 16pt;
+    }
+    h2 {
+        break-after: avoid;
+    }
+    h3 {
+        break-after: avoid;
+    }
+    table {
+        break-inside: avoid;
+    }
+    pre {
+        break-inside: avoid;
+    }
+}
+
+body {
+    font-family: "Times New Roman", Times, Georgia, serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 7in;
+    margin: 0 auto;
+    padding: 0.5in;
+}
+
+h1 {
+    font-size: 16pt;
+    text-align: center;
+    margin-bottom: 0.3em;
+    line-height: 1.3;
+}
+
+h2 {
+    font-size: 14pt;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.2em;
+}
+
+h3 {
+    font-size: 12pt;
+    margin-top: 1.2em;
+    margin-bottom: 0.3em;
+}
+
+p {
+    text-align: justify;
+    margin-bottom: 0.8em;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    font-size: 10pt;
+}
+
+th, td {
+    border: 1px solid #999;
+    padding: 6px 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+code {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 9.5pt;
+    background-color: #f5f5f5;
+    padding: 1px 4px;
+    border-radius: 2px;
+}
+
+pre {
+    background-color: #f5f5f5;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 9pt;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 2em 0;
+}
+
+ul, ol {
+    margin-bottom: 0.8em;
+    padding-left: 2em;
+}
+
+li {
+    margin-bottom: 0.3em;
+}
+
+blockquote {
+    border-left: 3px solid #ccc;
+    margin-left: 0;
+    padding-left: 1em;
+    color: #555;
+}
+</style>
+</head>
+<body>
+<h1>Composable Trust Infrastructure for the Agent Internet: A Federated Architecture for Verifiable AI Agent Identity, Capability Discovery, and Secure Communication</h1>
+<p><strong>Frans Development</strong></p>
+<p>Open Agent Trust Registry, agent.json</p>
+<p>March 2026</p>
+<p><strong>Preprint</strong> — CC-BY 4.0</p>
+<hr />
+<h2>Abstract</h2>
+<p>As autonomous AI agents increasingly act on behalf of humans — executing transactions, accessing services, and coordinating with other agents — the absence of a unified trust infrastructure creates systemic risk. No single protocol can answer all trust questions simultaneously: <em>who is this agent?</em>, <em>is its runtime legitimate?</em>, <em>what can it do?</em>, <em>what is it authorized to spend?</em>, and <em>was the action actually executed?</em> This paper presents a composable trust architecture where five independent, open-source protocols compose into an end-to-end verifiable agent trust stack without requiring runtime coordination between implementations. The architecture spans six layers — capability discovery (agent.json), identity verification (Open Agent Trust Registry), identity resolution (DID Resolution v1.0), encrypted transport (QSP-1), execution attestation (ArkForge), and delegation governance (Agent Passport System) — each answering a distinct trust question with a single shared cryptographic primitive (Ed25519). We demonstrate that the composition is achieved through three structural properties: a shared key type, a shared hosting convention (well-known files), and unidirectional data flow where each layer's output is the next layer's input. The architecture has been validated through a multi-party working group with seven registered issuers, unanimous spec ratifications, and cross-implementation conformance testing across TypeScript, Python, and Swift.</p>
+<p><strong>Keywords:</strong> AI agent trust, federated identity, composable protocols, agent verification, capability discovery, Ed25519, zero-trust architecture, multi-agent systems</p>
+<hr />
+<h2>1. Introduction</h2>
+<p>The emerging agent economy introduces a trust problem that traditional web authentication was not designed to solve. When a human user authenticates to a service, the trust chain is short: the user proves identity via credentials, and the service grants access. When an AI agent acts on behalf of a human, the trust chain lengthens: the service must verify not only the agent's identity but also its runtime legitimacy, its authorization scope, the human principal's delegation constraints, and — after execution — that the claimed action actually occurred.</p>
+<p>Existing approaches to this problem fall into two categories. Monolithic platforms (proprietary agent runtimes with built-in trust) solve the problem within their walled gardens but create vendor lock-in and prevent cross-platform agent interaction. Point solutions (individual authentication protocols, capability registries, or execution logging systems) solve one layer but leave gaps that attackers can exploit at layer boundaries.</p>
+<p>This paper presents a third approach: a composable trust architecture where independent protocols, developed by independent teams, compose into a complete trust stack through shared cryptographic conventions rather than shared governance or shared codebases. The architecture emerged from a working group (WG) of five founding projects that discovered, through independent implementation, that their protocols were already converging on the same primitives.</p>
+<h3>1.1 Contributions</h3>
+<p>This paper makes three contributions:</p>
+<ol>
+<li>
+<p><strong>A six-layer trust model</strong> that decomposes the agent trust problem into orthogonal questions, each answered by an independent protocol with a well-defined interface.</p>
+</li>
+<li>
+<p><strong>Three composition properties</strong> — shared key type (Ed25519), shared hosting convention (well-known files), and unidirectional data flow — that enable protocol composition without runtime coordination.</p>
+</li>
+<li>
+<p><strong>Empirical validation</strong> through a multi-party working group with cross-implementation conformance testing, seven registered issuers in production, and two unanimously ratified specifications.</p>
+</li>
+</ol>
+<hr />
+<h2>2. Problem Statement</h2>
+<p>Consider a concrete scenario: a user instructs their AI agent to pay an internet bill. The agent must interact with the user's bank or payment service. The service faces six distinct trust questions, each requiring different evidence:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Evidence Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>What services exist and what do they cost?</td>
+<td>Structured capability manifest</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Is this agent's runtime on an approved list?</td>
+<td>Cryptographically signed registry lookup</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Can I resolve this agent's identity to a verifiable key?</td>
+<td>DID resolution to Ed25519 public key</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Is the communication channel secure?</td>
+<td>End-to-end encrypted transport</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Did the agent actually execute what it claims?</td>
+<td>Signed execution receipt</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Was the agent authorized to spend this amount?</td>
+<td>Delegation chain with constraint verification</td>
+</tr>
+</tbody>
+</table>
+<p>No single protocol should attempt to answer all six questions. A monolithic trust protocol would be brittle (a vulnerability in the payment layer compromises identity), slow to evolve (all layers must release in lockstep), and politically untenable (no single organization should control all layers of agent trust).</p>
+<p>The challenge is designing protocols that answer their respective questions independently while composing into a verifiable end-to-end chain.</p>
+<hr />
+<h2>3. Architecture</h2>
+<h3>3.1 Layer Model</h3>
+<p>The composable trust stack consists of six layers, each implemented by an independent open-source project:</p>
+<pre><code>Layer 6: Delegation Governance  [Agent Passport System]
+  &quot;Was the agent authorized, within what constraints?&quot;
+
+Layer 5: Execution Attestation   [ArkForge]
+  &quot;Did the action actually happen? Proof.&quot;
+
+Layer 4: Encrypted Transport     [QSP-1 / qntm]
+  &quot;Is the channel secure and authenticated?&quot;
+
+Layer 3: Identity Resolution     [DID Resolution v1.0]
+  &quot;Where is this agent's verifiable key?&quot;
+
+Layer 2: Identity Verification   [Open Agent Trust Registry]
+  &quot;Is this runtime on the approved list?&quot;
+
+Layer 1: Capability Discovery    [agent.json]
+  &quot;What can this service do, and what does it cost?&quot;
+</code></pre>
+<p>Each layer's output becomes the next layer's input. An agent discovering a service (Layer 1) extracts the service's DID from the capability manifest. The DID resolves to an Ed25519 public key (Layer 3), which the agent verifies against the trust registry (Layer 2). Communication occurs over an encrypted channel authenticated by that key (Layer 4). The execution produces a signed receipt (Layer 5) within the constraints of the delegation chain (Layer 6).</p>
+<h3>3.2 Composition Properties</h3>
+<p>The six layers compose without runtime coordination due to three structural properties.</p>
+<p><strong>Property 1: Shared Key Type.</strong> All six protocols use Ed25519 (RFC 8032) as their primary cryptographic primitive. The Open Agent Trust Registry requires Ed25519 keys for issuer registration. DID Resolution v1.0 requires <code>did:web</code> and <code>did:key</code> (both Ed25519). QSP-1 uses Ed25519 for channel authentication. ArkForge signs execution receipts with Ed25519. The Agent Passport System uses Ed25519 for delegation chains. agent.json Tier 3 manifests carry Ed25519 public keys in their identity block.</p>
+<p>This convergence was not mandated by a central authority. Each project chose Ed25519 independently for its performance characteristics (sub-millisecond signing/verification), compact key size (32 bytes), and resistance to timing attacks. The convergence emerged from engineering constraints, not governance.</p>
+<p><strong>Property 2: Shared Hosting Convention.</strong> Three well-known files on the same domain provide the data needed for Layers 1-3:</p>
+<ul>
+<li><code>/.well-known/agent.json</code> — Capability manifest (Layer 1)</li>
+<li><code>/.well-known/agent-trust.json</code> — OATR domain verification (Layer 2)</li>
+<li><code>/.well-known/did.json</code> — DID document (Layer 3)</li>
+</ul>
+<p>A single HTTPS fetch to a domain can retrieve capability declarations, registry verification data, and identity resolution data. The hosting convention also serves as an implicit domain binding: publishing at a well-known path proves control of the domain without requiring an external certificate authority.</p>
+<p><strong>Property 3: Unidirectional Data Flow.</strong> Each layer consumes the output of the layer below and produces input for the layer above. No layer requires callbacks, webhooks, or bidirectional communication with other layers. This means:</p>
+<ul>
+<li>Layers can be implemented in any language (the WG has TypeScript, Python, and Swift implementations).</li>
+<li>Layers can be upgraded independently (a new version of DID Resolution does not require changes to the trust registry).</li>
+<li>Layers can be omitted (a service that doesn't need encrypted transport can skip Layer 4 and still verify identity).</li>
+</ul>
+<hr />
+<h2>4. Layer Specifications</h2>
+<h3>4.1 Layer 1: Capability Discovery (agent.json)</h3>
+<p>The agent.json specification (v1.3) defines a structured manifest that services publish at <code>/.well-known/agent.json</code>. The manifest declares:</p>
+<ul>
+<li><strong>Intents</strong>: Actions agents can perform, with endpoints, parameters, and return types.</li>
+<li><strong>Pricing</strong>: Per-call, per-unit, or free-tier cost structures.</li>
+<li><strong>Payment rails</strong>: x402 micropayments, Lightning/L402, Stripe, or custom rails.</li>
+<li><strong>Identity</strong>: Tier 3 manifests include <code>identity.did</code> (a <code>did:web</code> identifier) and an Ed25519 public key.</li>
+</ul>
+<p>The manifest answers Layer 1's question ("what can this service do?") in a machine-readable format. Agents can discover services, compare pricing, and select payment rails without human intervention. The identity block bridges to Layer 3 by providing the DID that resolves to the service's verification key.</p>
+<p>agent.json is deliberately rail-agnostic: it describes <em>what</em> payment options exist without embedding settlement logic. This separation allows new payment rails to emerge without spec changes.</p>
+<h3>4.2 Layer 2: Identity Verification (Open Agent Trust Registry)</h3>
+<p>The Open Agent Trust Registry (OATR) is a federated, cryptographically signed registry of trusted agent runtimes. It answers Layer 2's question ("is this runtime legitimate?") through a signed manifest containing all registered issuers.</p>
+<p><strong>Registration (Permissionless, Automated).</strong> Any runtime can register by proving three things:</p>
+<ol>
+<li>A valid Ed25519 public key (32 bytes, base64url-encoded).</li>
+<li>Proof of key ownership: a detached Ed25519 signature over the canonical message <code>oatr-proof-v1:{issuer_id}</code>.</li>
+<li>Domain verification: hosting a <code>/.well-known/agent-trust.json</code> file or including <code>oatr_issuer_id</code> in an agent.json identity block.</li>
+</ol>
+<p>Registration is fully automated via CI. The verification pipeline validates the key format, verifies the Ed25519 signature, fetches the domain verification file, and auto-merges on success. No human approval is required for inclusion. This mirrors the Let's Encrypt model: prove control, receive trust.</p>
+<p><strong>Verification (Local, Sub-Millisecond).</strong> Services verify agent attestations in 14 steps, all performed locally against a cached manifest:</p>
+<ol>
+<li>Parse the incoming JWS attestation.</li>
+<li>Extract <code>iss</code> (issuer ID) and <code>kid</code> (key ID) from the protected header.</li>
+<li>Look up the issuer in the local manifest copy.
+4-10. Validate issuer status, key status, key expiry.</li>
+<li>Cryptographically verify the Ed25519 signature.
+12-14. Validate claims: audience binding, expiry, nonce.</li>
+</ol>
+<p>No network calls are required during verification. The manifest is fetched and cached periodically (default: 15 minutes). Verification completes in under 1 millisecond.</p>
+<p><strong>Governance (Threshold-Signed).</strong> The registry's governance model uses 3-of-5 threshold signing (FROST over Ed25519) for revocation decisions. Five master keys are distributed across the founding maintainer and four independent ecosystem reviewers. No single party — including the founder — can unilaterally revoke an issuer. All revocations require a public GitHub Issue with documented justification and one of five enumerated reasons: key compromise, issuer compromise, policy violation, voluntary withdrawal, or governance decision.</p>
+<p><strong>Zero-Trust Mirrors.</strong> The manifest is cryptographically signed. Anyone can host an exact mirror without compromising security — a tampered manifest fails signature verification. Mirrors are zero-trust messengers: they distribute data but cannot forge it. Clients always verify signatures against the root-keys trust anchor.</p>
+<h3>4.3 Layer 3: Identity Resolution (DID Resolution v1.0)</h3>
+<p>DID Resolution v1.0 (ratified unanimously by the WG) defines how agent DIDs resolve to Ed25519 public keys. The spec requires <code>did:web</code> and <code>did:key</code> as mandatory methods, with <code>did:aps</code> and <code>did:agentid</code> as recommended extensions.</p>
+<p>The resolution output is a public key and a sender ID (Trunc16 of SHA-256 over the raw public key bytes). The sender ID serves as a compact, collision-resistant identifier that can be matched across protocols without transmitting the full key.</p>
+<p>The spec emerged from convergent implementation: three WG projects (OATR, ArkForge, and qntm) independently implemented SHA-256 truncated fingerprints for key identification before the spec was drafted. The spec formalized what had already converged organically.</p>
+<h3>4.4 Layer 4: Encrypted Transport (QSP-1)</h3>
+<p>QSP-1 (Quantum-Safe Protocol v1.0, ratified unanimously) provides end-to-end encrypted communication channels between agents. Channel authentication uses Ed25519 key pairs, with identity derived from the same DID resolution layer.</p>
+<p>QSP-1's key design decision is separating channel encryption from identity verification. The protocol establishes encrypted channels; the trust registry determines whether the parties in those channels are legitimate. This separation means QSP-1 can be deployed without the registry (for private networks) or the registry can be used without QSP-1 (for services that use standard HTTPS).</p>
+<h3>4.5 Layer 5: Execution Attestation (ArkForge)</h3>
+<p>ArkForge provides cryptographically signed execution receipts — proof that an agent action actually occurred. Each receipt binds:</p>
+<ul>
+<li>The agent's DID (resolved via Layer 3)</li>
+<li>The action performed</li>
+<li>The timestamp</li>
+<li>An Ed25519 signature from the execution environment</li>
+</ul>
+<p>The receipt chain creates an immutable audit trail. When combined with agent.json's capability declaration (Layer 1) and a DID binding (Layer 3), the composition yields: capability declaration → identity verification → execution proof. As articulated by the ArkForge maintainer: dispute resolution becomes a lookup.</p>
+<h3>4.6 Layer 6: Delegation Governance (Agent Passport System)</h3>
+<p>The Agent Passport System (APS) formalizes the delegation chain from human principal to agent to sub-agent. APS enforces constraints across seven dimensions — scope, spend, depth, time, reputation, values, and reversibility — which Pidlisnyi [1] formalizes as a product lattice with a monotonic narrowing invariant.</p>
+<p>APS produces three artifacts that compose with the lower layers:</p>
+<ul>
+<li><strong>AuthorizationWitness</strong>: A signed snapshot of the agent's position in the authority lattice at execution time, bound to the OATR-verified runtime identity.</li>
+<li><strong>ConstraintVector</strong>: Runtime evaluation showing which constraint dimensions passed or failed.</li>
+<li><strong>ConstraintFailure</strong>: Structured denial identifying exactly which dimensions blocked authorization.</li>
+</ul>
+<p>The delegation layer depends on the identity layer: an AuthorizationWitness is only meaningful if signed by a runtime registered in the trust registry. The lattice is mathematically sound; the registry makes it operationally enforceable.</p>
+<hr />
+<h2>5. Security Analysis</h2>
+<h3>5.1 Threat Model</h3>
+<p>The architecture assumes a threat model where any individual component may be compromised, but the composition of independent verification layers makes systemic compromise exponentially harder.</p>
+<table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>Compromised Layer</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rogue mirror serves tampered registry</td>
+<td>Layer 2 (distribution)</td>
+<td>Ed25519 signature verification against root keys</td>
+</tr>
+<tr>
+<td>Compromised root signing key</td>
+<td>Layer 2 (governance)</td>
+<td>3-of-5 threshold — single key insufficient</td>
+</tr>
+<tr>
+<td>Malicious issuer registers and issues false attestations</td>
+<td>Layer 2 (registration)</td>
+<td>Permanent audit trail, governance-backed revocation</td>
+</tr>
+<tr>
+<td>Attestation replay across services</td>
+<td>Layer 2 (attestation)</td>
+<td>Audience (<code>aud</code>) claim binding per service</td>
+</tr>
+<tr>
+<td>Attestation replay within service</td>
+<td>Layer 2 (attestation)</td>
+<td>Service-provided nonce + short TTL (max 1 hour)</td>
+</tr>
+<tr>
+<td>Stale registry missing revocation</td>
+<td>Layer 2 (caching)</td>
+<td><code>expires_at</code> enforcement, 15-minute SDK cache default</td>
+</tr>
+<tr>
+<td>Agent claims false capability</td>
+<td>Layer 1 (discovery)</td>
+<td>Capability manifest is service-published, not agent-published</td>
+</tr>
+<tr>
+<td>Forged execution receipt</td>
+<td>Layer 5 (attestation)</td>
+<td>Ed25519 signature by execution environment</td>
+</tr>
+<tr>
+<td>Unauthorized delegation</td>
+<td>Layer 6 (governance)</td>
+<td>Monotonic narrowing invariant [1]</td>
+</tr>
+</tbody>
+</table>
+<h3>5.2 Composition Security Properties</h3>
+<p>The layered architecture provides defense-in-depth properties that monolithic systems cannot:</p>
+<ol>
+<li><strong>Layer isolation</strong>: A vulnerability in the payment layer (Layer 1 pricing) does not compromise identity verification (Layer 2).</li>
+<li><strong>Independent revocation</strong>: Each layer can revoke credentials independently. A revoked OATR issuer immediately invalidates all attestations regardless of the delegation layer's state.</li>
+<li><strong>Progressive trust</strong>: Services can adopt layers incrementally. A service that only needs identity verification deploys Layers 2-3; a service requiring full delegation governance adds Layer 6.</li>
+</ol>
+<hr />
+<h2>6. Empirical Validation</h2>
+<h3>6.1 Working Group Process</h3>
+<p>The architecture was validated through a multi-party working group comprising five founding projects:</p>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Layer</th>
+<th>Implementation Language</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>agent.json</td>
+<td>Capability Discovery</td>
+<td>TypeScript</td>
+</tr>
+<tr>
+<td>Open Agent Trust Registry</td>
+<td>Identity Verification</td>
+<td>TypeScript, Swift</td>
+</tr>
+<tr>
+<td>qntm</td>
+<td>Encrypted Transport</td>
+<td>Python, TypeScript</td>
+</tr>
+<tr>
+<td>ArkForge</td>
+<td>Execution Attestation</td>
+<td>TypeScript</td>
+</tr>
+<tr>
+<td>Agent Passport System</td>
+<td>Delegation Governance</td>
+<td>TypeScript</td>
+</tr>
+</tbody>
+</table>
+<p>Two additional projects (AgentID, Agora) joined as aligning members, contributing DID resolution implementations in Python and TypeScript respectively.</p>
+<h3>6.2 Spec Ratification</h3>
+<p>Two specifications have been ratified unanimously:</p>
+<ul>
+<li><strong>QSP-1 v1.0</strong> (Transport): Ratified by all founding members.</li>
+<li><strong>DID Resolution v1.0</strong> (Identity Resolution): Ratified with 8/8 conformance test vectors passing across three independent implementations (TypeScript, Python, and TypeScript/Agora).</li>
+<li><strong>Entity Verification v1.0</strong>: Ratified by founding members with cross-implementation conformance testing.</li>
+</ul>
+<h3>6.3 Production Deployment</h3>
+<p>The registry currently has seven registered issuers in production, each verified through the automated CI pipeline. One WG member (AgentID) has deployed a seven-agent sales pipeline across 12 countries using the identity infrastructure as the operational trust layer, with verified handoffs at every pipeline step.</p>
+<h3>6.4 Cross-Implementation Conformance</h3>
+<p>DID Resolution v1.0 test vectors were independently verified by:
+- OATR (TypeScript) — 8/8 vectors
+- AgentID (Python) — 8/8 vectors
+- Agora (TypeScript) — 8/8 vectors
+- ArkForge (TypeScript) — confirmed via live DID document fetch</p>
+<p>The sender ID derivation (SHA-256 Trunc16) converged independently in three implementations before the spec was written, providing evidence that the abstraction is natural and implementable.</p>
+<hr />
+<h2>7. Related Work</h2>
+<p><strong>Decentralized Identity Foundation (DIF) Trusted AI Agents Working Group.</strong> The DIF has established a working group for trusted AI agents, focusing on cross-platform trust scoring and agent authorization decisions. The composable trust stack presented here addresses the implementation layer that DIF's standards work operates above.</p>
+<p><strong>Google A2A Protocol.</strong> The Agent-to-Agent protocol defines Agent Cards for agent discovery but does not include a root-of-trust registry for verifying agent identity. The OATR registry could serve as the verification layer for A2A Agent Card claims.</p>
+<p><strong>Visa Trusted Agent Protocol.</strong> Visa's protocol for agentic commerce addresses trust in financial agent transactions. The composable stack's delegation governance layer (APS) and the lattice formalization [1] provide the mathematical framework for the constraint enforcement that agentic commerce requires.</p>
+<p><strong>Pidlisnyi [1] Faceted Authority Attenuation.</strong> Formalizes the constraint dimensions enforced by the delegation layer as a product lattice. The monotonic narrowing invariant proven in [1] provides the theoretical foundation for Layer 6 of this architecture. The composable stack provides the infrastructure layers (identity, resolution, transport) that make the lattice operationally enforceable.</p>
+<hr />
+<h2>8. Conclusion</h2>
+<p>The composable trust architecture demonstrates that the agent trust problem decomposes into six orthogonal questions, each answerable by an independent protocol. Composition is achieved not through governance mandates or API contracts but through three emergent structural properties: a shared key type, a shared hosting convention, and unidirectional data flow. The architecture has been validated through unanimous spec ratifications, cross-implementation conformance testing, and production deployment.</p>
+<p>The key insight is that composability through convergence is more robust than composability through design. When independent teams, solving different problems, converge on the same cryptographic primitive and the same hosting conventions, the resulting composition is natural rather than imposed. Each layer can evolve independently, be implemented in any language, and be adopted incrementally.</p>
+<p>The agent internet requires trust infrastructure that no single organization controls. This paper presents one path toward that infrastructure: open protocols, federated governance, cryptographic verification, and composable layers that together answer the full chain of trust questions that autonomous agents must satisfy.</p>
+<hr />
+<h2>References</h2>
+<p>[1] T. Pidlisnyi, "Faceted Authority Attenuation: A Product Lattice Model for AI Agent Governance," Zenodo, 2026. DOI: 10.5281/zenodo.19260073</p>
+<p>[2] D. J. Bernstein, N. Duif, T. Lange, P. Schwabe, and B.-Y. Yang, "High-speed high-security signatures," Journal of Cryptographic Engineering, vol. 2, no. 2, pp. 77-89, 2012.</p>
+<p>[3] W3C, "Decentralized Identifiers (DIDs) v1.0," W3C Recommendation, July 2022.</p>
+<p>[4] M. Jones, J. Bradley, and N. Sakimura, "JSON Web Signature (JWS)," RFC 7515, IETF, May 2015.</p>
+<p>[5] M. Jones, "JSON Web Key (JWK)," RFC 7517, IETF, May 2015.</p>
+<p>[6] A. Rundgren, B. Jordan, and S. Erdtman, "JSON Canonicalization Scheme (JCS)," RFC 8785, IETF, June 2020.</p>
+<hr />
+<p><strong>Author Information</strong></p>
+<p>Frans Development is the creator and maintainer of the Open Agent Trust Registry and the agent.json specification. Contact: https://github.com/FransDevelopment</p>
+<p><strong>Data Availability</strong></p>
+<p>All source code, specifications, and registry data referenced in this paper are publicly available:</p>
+<ul>
+<li>Open Agent Trust Registry: https://github.com/FransDevelopment/open-agent-trust-registry</li>
+<li>agent.json: https://github.com/FransDevelopment/agent-json</li>
+<li>DID Resolution v1.0: https://github.com/corpollc/qntm/blob/main/specs/working-group/did-resolution.md</li>
+</ul>
+<p><strong>License</strong></p>
+<p>This work is licensed under a Creative Commons Attribution 4.0 International License (CC-BY 4.0).</p>
+</body>
+</html>

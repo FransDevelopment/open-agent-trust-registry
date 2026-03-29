@@ -3,6 +3,9 @@
 import * as jose from 'jose';
 import type { RegistryManifest, RevocationList, VerificationResult, AttestationClaims } from './types';
 
+/** Grace period for deprecated keys, per spec/04-key-rotation.md. */
+const GRACE_PERIOD_MS = 90 * 24 * 60 * 60 * 1000;
+
 /**
  * Executes the 14-step Verification Protocol to assess an agent attestation.
  * Operates purely locally in <1ms without any network calls.
@@ -12,7 +15,8 @@ export async function verifyAttestation(
   manifest: RegistryManifest,
   revocations: RevocationList,
   expectedAudience: string,
-  expectedNonce?: string
+  expectedNonce?: string,
+  now?: Date
 ): Promise<VerificationResult> {
 
   try {
@@ -39,8 +43,9 @@ export async function verifyAttestation(
     // Step 4: Unknown Issuer
     if (!issuer) return { valid: false, reason: 'unknown_issuer' };
 
-    // Step 5: Active check
-    if (issuer.status !== 'active') return { valid: false, reason: 'revoked_issuer', issuer };
+    // Step 5: Issuer status check
+    if (issuer.status === 'suspended') return { valid: false, reason: 'suspended_issuer', issuer };
+    if (issuer.status === 'revoked') return { valid: false, reason: 'revoked_issuer', issuer };
 
     // Step 6: Locate key
     const key = issuer.public_keys.find(k => k.kid === kid);
@@ -51,12 +56,22 @@ export async function verifyAttestation(
     // Step 8: Revoked Key status check
     if (key.status === 'revoked') return { valid: false, reason: 'revoked_key', issuer };
 
-    // Step 9: Deprecated logic gracefully handled (we just accept it, perhaps logging later)
-    
+    // Step 9: Grace period enforcement for deprecated keys
+    const currentTime = now ?? new Date();
+    if (key.status === 'deprecated') {
+      if (!key.deprecated_at) {
+        return { valid: false, reason: 'grace_period_expired', issuer };
+      }
+      const deprecatedAt = new Date(key.deprecated_at);
+      const elapsed = currentTime.getTime() - deprecatedAt.getTime();
+      if (elapsed > GRACE_PERIOD_MS) {
+        return { valid: false, reason: 'grace_period_expired', issuer };
+      }
+    }
+
     // Step 10: Check key expiration against current date
-    const now = new Date();
     const keyExpiry = new Date(key.expires_at);
-    if (now > keyExpiry) return { valid: false, reason: 'invalid_signature', issuer }; 
+    if (currentTime > keyExpiry) return { valid: false, reason: 'invalid_signature', issuer }; 
 
     // Step 11 & 12: Cryptographically verify the signature
     try {

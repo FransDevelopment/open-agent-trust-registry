@@ -8,6 +8,9 @@ describe('OpenAgentTrustRegistry (Client)', () => {
   let validKeypair: jose.GenerateKeyPairResult;
   let revokedKeypair: jose.GenerateKeyPairResult;
   let expiredKeypair: jose.GenerateKeyPairResult;
+  let deprecatedKeypair: jose.GenerateKeyPairResult;
+  let secondActiveKeypair: jose.GenerateKeyPairResult;
+  let fastpathKeypair: jose.GenerateKeyPairResult;
   
   let manifest: RegistryManifest;
   let revocations: RevocationList;
@@ -18,10 +21,16 @@ describe('OpenAgentTrustRegistry (Client)', () => {
     validKeypair = await jose.generateKeyPair('EdDSA', { crv: 'Ed25519' });
     revokedKeypair = await jose.generateKeyPair('EdDSA', { crv: 'Ed25519' });
     expiredKeypair = await jose.generateKeyPair('EdDSA', { crv: 'Ed25519' });
+    deprecatedKeypair = await jose.generateKeyPair('EdDSA', { crv: 'Ed25519' });
+    secondActiveKeypair = await jose.generateKeyPair('EdDSA', { crv: 'Ed25519' });
+    fastpathKeypair = await jose.generateKeyPair('EdDSA', { crv: 'Ed25519' });
 
     const validJwk = await jose.exportJWK(validKeypair.publicKey);
     const revokedJwk = await jose.exportJWK(revokedKeypair.publicKey);
     const expiredJwk = await jose.exportJWK(expiredKeypair.publicKey);
+    const deprecatedJwk = await jose.exportJWK(deprecatedKeypair.publicKey);
+    const secondActiveJwk = await jose.exportJWK(secondActiveKeypair.publicKey);
+    const fastpathJwk = await jose.exportJWK(fastpathKeypair.publicKey);
 
     manifest = {
       schema_version: "1.0.0",
@@ -59,8 +68,80 @@ describe('OpenAgentTrustRegistry (Client)', () => {
               expires_at: new Date(Date.now() - 86400000).toISOString(), // Expired yesterday
               deprecated_at: null,
               revoked_at: null
+            },
+            {
+              kid: "deprecated-within-grace",
+              algorithm: "Ed25519",
+              public_key: deprecatedJwk.x!,
+              status: "deprecated",
+              issued_at: new Date(Date.now() - 86400000 * 60).toISOString(),
+              expires_at: new Date(Date.now() + 86400000 * 300).toISOString(),
+              deprecated_at: new Date(Date.now() - 86400000 * 30).toISOString(), // 30 days ago
+              revoked_at: null
+            },
+            {
+              kid: "deprecated-past-grace",
+              algorithm: "Ed25519",
+              public_key: deprecatedJwk.x!,
+              status: "deprecated",
+              issued_at: new Date(Date.now() - 86400000 * 200).toISOString(),
+              expires_at: new Date(Date.now() + 86400000 * 100).toISOString(),
+              deprecated_at: new Date(Date.now() - 86400000 * 120).toISOString(), // 120 days ago
+              revoked_at: null
+            },
+            {
+              kid: "deprecated-no-timestamp",
+              algorithm: "Ed25519",
+              public_key: deprecatedJwk.x!,
+              status: "deprecated",
+              issued_at: new Date(Date.now() - 86400000 * 60).toISOString(),
+              expires_at: new Date(Date.now() + 86400000 * 300).toISOString(),
+              deprecated_at: null, // Missing deprecated_at — data integrity error
+              revoked_at: null
+            },
+            {
+              kid: "second-active-key",
+              algorithm: "Ed25519",
+              public_key: secondActiveJwk.x!,
+              status: "active",
+              issued_at: new Date().toISOString(),
+              expires_at: new Date(Date.now() + 86400000).toISOString(),
+              deprecated_at: null,
+              revoked_at: null
+            },
+            {
+              kid: "fastpath-key",
+              algorithm: "Ed25519",
+              public_key: fastpathJwk.x!,
+              status: "active",
+              issued_at: new Date().toISOString(),
+              expires_at: new Date(Date.now() + 86400000).toISOString(),
+              deprecated_at: null,
+              revoked_at: null
             }
           ]
+        },
+        {
+           issuer_id: "suspended-issuer",
+           display_name: "Suspended Issuer",
+           website: "https://suspended.com",
+           security_contact: "sec@suspended.com",
+           status: "suspended",
+           added_at: new Date().toISOString(),
+           last_verified: new Date().toISOString(),
+           capabilities: { supervision_model: 'none', audit_logging: false, immutable_audit: false, attestation_format: 'jwt', max_attestation_ttl_seconds: 3600, capabilities_verified: false },
+           public_keys: [
+             {
+               kid: "suspended-key-1",
+               algorithm: "Ed25519",
+               public_key: validJwk.x!,
+               status: "active",
+               issued_at: new Date().toISOString(),
+               expires_at: new Date(Date.now() + 86400000).toISOString(),
+               deprecated_at: null,
+               revoked_at: null
+             }
+           ]
         },
         {
            issuer_id: "revoked-issuer",
@@ -92,7 +173,7 @@ describe('OpenAgentTrustRegistry (Client)', () => {
         generated_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + 86400000).toISOString(),
         revoked_issuers: [{ issuer_id: 'revoked-issuer', reason: 'policy_violation', revoked_at: new Date().toISOString() }],
-        revoked_keys: [],
+        revoked_keys: [{ issuer_id: 'valid-issuer', kid: 'fastpath-key', reason: 'key_compromise', revoked_at: new Date().toISOString() }],
         signature: { algorithm: 'Ed25519', kid: 'registry-root-2026-03', value: 'placeholder' }
     };
   });
@@ -197,9 +278,59 @@ describe('OpenAgentTrustRegistry (Client)', () => {
       const token = await signToken(validKeypair, 'valid-issuer', 'valid-key-1', 'https://api.service.com', 3600, 'nonce-123');
       // Verifying but expecting a completely different nonce
       const res = await verifyAttestation(token, manifest, revocations, 'https://api.service.com', 'nonce-999');
-      
+
       expect(res.valid).toBe(false);
       expect(res.reason).toBe('nonce_mismatch');
+  });
+
+  // --- Key Rotation & Grace Period Tests ---
+
+  it('accepts a deprecated key within the 90-day grace period (Step 9c)', async () => {
+      const token = await signToken(deprecatedKeypair, 'valid-issuer', 'deprecated-within-grace', 'https://api.service.com');
+      const res = await verifyAttestation(token, manifest, revocations, 'https://api.service.com');
+
+      expect(res.valid).toBe(true);
+      expect(res.issuer?.issuer_id).toBe('valid-issuer');
+  });
+
+  it('rejects a deprecated key past the 90-day grace period (Step 9b)', async () => {
+      const token = await signToken(deprecatedKeypair, 'valid-issuer', 'deprecated-past-grace', 'https://api.service.com');
+      const res = await verifyAttestation(token, manifest, revocations, 'https://api.service.com');
+
+      expect(res.valid).toBe(false);
+      expect(res.reason).toBe('grace_period_expired');
+  });
+
+  it('rejects a deprecated key with missing deprecated_at (Step 9a)', async () => {
+      const token = await signToken(deprecatedKeypair, 'valid-issuer', 'deprecated-no-timestamp', 'https://api.service.com');
+      const res = await verifyAttestation(token, manifest, revocations, 'https://api.service.com');
+
+      expect(res.valid).toBe(false);
+      expect(res.reason).toBe('grace_period_expired');
+  });
+
+  it('rejects a suspended issuer with suspended_issuer reason (Step 5)', async () => {
+      const token = await signToken(validKeypair, 'suspended-issuer', 'suspended-key-1', 'https://api.service.com');
+      const res = await verifyAttestation(token, manifest, revocations, 'https://api.service.com');
+
+      expect(res.valid).toBe(false);
+      expect(res.reason).toBe('suspended_issuer');
+  });
+
+  it('verifies with a second active key (multiple active keys)', async () => {
+      const token = await signToken(secondActiveKeypair, 'valid-issuer', 'second-active-key', 'https://api.service.com');
+      const res = await verifyAttestation(token, manifest, revocations, 'https://api.service.com');
+
+      expect(res.valid).toBe(true);
+      expect(res.issuer?.issuer_id).toBe('valid-issuer');
+  });
+
+  it('rejects via revocations fast-path even if key is active in manifest', async () => {
+      const token = await signToken(fastpathKeypair, 'valid-issuer', 'fastpath-key', 'https://api.service.com');
+      const res = await verifyAttestation(token, manifest, revocations, 'https://api.service.com');
+
+      expect(res.valid).toBe(false);
+      expect(res.reason).toBe('revoked_key');
   });
 
 });

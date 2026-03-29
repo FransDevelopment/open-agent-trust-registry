@@ -1,7 +1,10 @@
 import Foundation
 
+/// Grace period for deprecated keys, per spec/04-key-rotation.md.
+private let gracePeriodSeconds: TimeInterval = 90 * 24 * 60 * 60
+
 public struct Verification {
-    
+
     /// Executes the identical 14-step Verification Protocol to assess an agent attestation natively in Swift.
     /// Operates purely locally in <1ms without any network calls.
     public static func verifyAttestation(
@@ -9,7 +12,8 @@ public struct Verification {
         manifest: RegistryManifest,
         revocations: RevocationList,
         expectedAudience: String,
-        expectedNonce: String? = nil
+        expectedNonce: String? = nil,
+        now: Date = Date()
     ) -> VerificationResult {
         
         do {
@@ -35,8 +39,11 @@ public struct Verification {
                 return VerificationResult(valid: false, reason: .unknownIssuer) // Step 4
             }
             
-            // Step 5: Active check
-            if issuer.status != .active {
+            // Step 5: Issuer status check
+            if issuer.status == .suspended {
+                return VerificationResult(valid: false, reason: .suspendedIssuer, issuer: issuer)
+            }
+            if issuer.status == .revoked {
                 return VerificationResult(valid: false, reason: .revokedIssuer, issuer: issuer)
             }
             
@@ -50,19 +57,28 @@ public struct Verification {
                 return VerificationResult(valid: false, reason: .revokedKey, issuer: issuer)
             }
             
-            // Step 9: Deprecated logic gracefully handled (we just accept it, perhaps logging later)
-            
-            // Step 10: Check key expiration against current date
+            // Date formatters for ISO 8601 parsing
             let isoFormatter = ISO8601DateFormatter()
             isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            // Standard fallback if fractional seconds fail
             let fallbackFormatter = ISO8601DateFormatter()
-            
+
+            // Step 9: Grace period enforcement for deprecated keys
+            if key.status == .deprecated {
+                guard let deprecatedAtString = key.deprecatedAt,
+                      let deprecatedAt = isoFormatter.date(from: deprecatedAtString) ?? fallbackFormatter.date(from: deprecatedAtString) else {
+                    return VerificationResult(valid: false, reason: .gracePeriodExpired, issuer: issuer)
+                }
+                let elapsed = now.timeIntervalSince(deprecatedAt)
+                if elapsed > gracePeriodSeconds {
+                    return VerificationResult(valid: false, reason: .gracePeriodExpired, issuer: issuer)
+                }
+            }
+
+            // Step 10: Check key expiration against current date
             guard let keyExpiry = isoFormatter.date(from: key.expiresAt) ?? fallbackFormatter.date(from: key.expiresAt) else {
                 return VerificationResult(valid: false, reason: .invalidSignature, issuer: issuer)
             }
-            
-            let now = Date()
+
             if now > keyExpiry {
                 return VerificationResult(valid: false, reason: .invalidSignature, issuer: issuer)
             }

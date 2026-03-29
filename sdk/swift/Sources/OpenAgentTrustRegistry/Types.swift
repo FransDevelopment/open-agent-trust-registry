@@ -230,8 +230,10 @@ public struct AttestationClaims: Codable {
 public enum VerificationReason: String {
     case unknownIssuer = "unknown_issuer"
     case revokedIssuer = "revoked_issuer"
+    case suspendedIssuer = "suspended_issuer"
     case unknownKey = "unknown_key"
     case revokedKey = "revoked_key"
+    case gracePeriodExpired = "grace_period_expired"
     case expiredAttestation = "expired_attestation"
     case invalidSignature = "invalid_signature"
     case audienceMismatch = "audience_mismatch"

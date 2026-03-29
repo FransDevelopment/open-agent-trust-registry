@@ -14,12 +14,16 @@ Step 2: Extract the `iss` (issuer_id) and `kid` (Key ID) from the JWS header.
 
 Step 3: Look up the `issuer_id` within the local copy of the registry manifest.
 Step 4: If the issuer is not found → REJECT (Unknown Issuer).
-Step 5: If the issuer `status` is not "active" → REJECT (Issuer Suspended/Revoked).
+Step 5: If the issuer `status` is "suspended" → REJECT (Issuer Suspended).
+         If the issuer `status` is "revoked" → REJECT (Issuer Revoked).
 
 Step 6: Locate the public key in the `public_keys` array matching the extracted `kid`.
 Step 7: If the key is not found → REJECT (Unknown Key).
 Step 8: If the key `status` is "revoked" → REJECT.
-Step 9: If the key `status` is "deprecated" → ACCEPT but log a warning that rotation is imminent.
+Step 9: If the key `status` is "deprecated":
+  9a: If `deprecated_at` is not set → REJECT (data integrity error).
+  9b: If current_time - `deprecated_at` > 90 days (grace period, see 04-key-rotation.md) → REJECT (Grace Period Expired).
+  9c: Otherwise → ACCEPT but log a warning that key rotation is imminent.
 Step 10: If the key is expired (current time > `expires_at`) → REJECT.
 
 Step 11: Verify the JWS signature using the located public key.

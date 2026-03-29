@@ -38,7 +38,7 @@ export interface AttestationClaims {
 
 export interface VerificationResult {
   valid: boolean;
-  reason?: 'unknown_issuer' | 'revoked_issuer' | 'unknown_key' | 'revoked_key' | 'expired_attestation' | 'invalid_signature' | 'audience_mismatch' | 'nonce_mismatch';
+  reason?: 'unknown_issuer' | 'revoked_issuer' | 'suspended_issuer' | 'unknown_key' | 'revoked_key' | 'grace_period_expired' | 'expired_attestation' | 'invalid_signature' | 'audience_mismatch' | 'nonce_mismatch';
   issuer?: import('./registry').IssuerEntry;
   claims?: AttestationClaims;
 }
