@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-04T13:16:40.196Z",
-  "expires_at": "2026-04-04T15:16:40.196Z",
+  "generated_at": "2026-04-04T14:04:36.358Z",
+  "expires_at": "2026-04-04T16:04:36.358Z",
   "revoked_keys": [],
   "revoked_issuers": [],
   "signature": {
     "algorithm": "Ed25519",
     "kid": "registry-root-2026-03",
-    "value": "l6ZCveiUePZuuiAXrysoKhL8PHHCb7YYQG_osJaOuZZ7gGeQl3uKIIaL59xGgf_LBP6OXR7FbOlIPS8mw85ABg"
+    "value": "hd0LxXsgql0cceaeoGuujhdW8V1cJwhNw9M7Be4Hq20Ela41sJsVbq_PhtCcpdQQDSFI_8PtMnofY3xUFJhrAw"
   }
 }
