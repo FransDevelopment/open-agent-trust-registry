@@ -49,15 +49,27 @@ Then submit a PR with `registry/issuers/your-runtime.json` and `registry/proofs/
 
 We maintain [`good first issue`](https://github.com/FransDevelopment/open-agent-trust-registry/labels/good%20first%20issue) labels for scoped, achievable tasks. Current examples:
 
-- **[Port the SDK to Python](https://github.com/FransDevelopment/open-agent-trust-registry/issues/15)** — the WG has multiple Python implementations that need native verification
 - **[Build a mirror health checker](https://github.com/FransDevelopment/open-agent-trust-registry/issues/16)** — monitor whether registry mirrors are valid and up-to-date
 - **[Add key rotation test vectors](https://github.com/FransDevelopment/open-agent-trust-registry/issues/17)** — enable interop testing for key lifecycle management
 - **[Improve repo discoverability](https://github.com/FransDevelopment/open-agent-trust-registry/issues/18)** — badges, topic tags, integration links
 - **[Add --verify flag to the prove CLI](https://github.com/FransDevelopment/open-agent-trust-registry/issues/19)** — let contributors check proofs locally before submitting
 
-### 3. Develop specs and tooling
+### 3. Build a community SDK
 
-For changes to specifications, SDKs, CLI, or infrastructure:
+SDKs in languages other than those already in-tree (TypeScript, Swift) are welcome as **community projects**, not as merges into this repository. Keeping community SDKs in their own repos lets them move at their own pace, makes the maintainer relationship explicit to users, and avoids the core team having to land every spec change across an ever-growing set of SDKs before it can ship.
+
+If you want to build one:
+
+1. Build and publish it in your own repo, under a package name you clearly control (e.g. `yourname-oatr`, `oatr-<lang>`). Do **not** publish under the `open-agent-trust` name unless you are the core team.
+2. Implement the full verification protocol, including **trust-anchor verification of the manifest and revocation list** against the bundled `root-keys.json`. Skipping this step defeats the entire purpose of the registry — a compromised mirror could serve any manifest and verification would still pass. See `sdk/typescript/src/registry-artifacts.ts` for the reference implementation.
+3. Target a specific spec version and note it in your README.
+4. Open a PR against this repo's main README adding your SDK to the **Community SDKs** section with: language, repo link, maintainer handle, spec version, and a note on trust-anchor verification support.
+
+We do not accept new SDK ports as PRs into `sdk/` — please build them as community SDKs and we'll link to them.
+
+### 4. Develop specs and tooling
+
+For changes to specifications, the in-tree SDKs, CLI, or infrastructure:
 
 1. Fork the repo and create your branch from `main`
 2. If changing a spec (`spec/`), explain the cryptographic or architectural rationale in your PR
@@ -74,7 +86,7 @@ cd cli && npm ci && npx tsx src/index.ts --help
 
 **Requirements:** Node.js 22+
 
-### 4. Join the Working Group
+### 5. Join the Working Group
 
 The [Agent Identity Working Group](https://github.com/corpollc/qntm/issues/5) coordinates across multiple projects building agent identity, transport, and trust infrastructure. Current participants:
 

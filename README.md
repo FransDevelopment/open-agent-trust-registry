@@ -251,6 +251,21 @@ The architecture and protocols are defined in the `spec/` directory:
 ### Draft Specifications
 - [Multi-Signature Ceremony](docs/multi-sig-ceremony.md) — 3-of-5 threshold signing (FROST) for registry governance
 
+## SDKs
+
+The core team maintains the following in-tree SDKs. They implement the full verification protocol — including trust-anchor validation of the manifest and revocation list against bundled root keys — and are released in lockstep with the spec.
+
+- **[TypeScript](sdk/typescript)** — reference implementation (`@open-agent-trust/registry` on npm)
+- **[Swift](sdk/swift)** — native Apple platform support
+
+### Community SDKs
+
+SDKs in other languages are welcome as **community projects** maintained in their own repositories. They are not produced or reviewed by the core team, and their release cadence, feature coverage, and security posture are the responsibility of their maintainers.
+
+*No community SDKs are listed yet.* If you have built one and want it linked here, open a PR against this README adding an entry with: language, repo link, maintainer handle, the spec version it targets, and whether it implements trust-anchor verification of the manifest (the most important security property).
+
+> **Why not in-tree?** With a small core team, accepting additional SDKs into the main repository means every spec change has to land in every SDK before it can ship. That slows the spec down and risks SDKs drifting out of sync. Keeping community SDKs in their own repos lets them move at their own pace and makes it clear to users who maintains what. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full policy.
+
 ## Governance & Contributions
 
 This project is community-owned. Please see [GOVERNANCE.md](GOVERNANCE.md) to understand how decisions are made, how keys are managed, and how you can join as a maintainer.
