@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
   "registry_id": "open-trust-registry",
-  "generated_at": "2026-04-16T22:05:04.284Z",
-  "expires_at": "2026-04-16T23:05:04.284Z",
+  "generated_at": "2026-04-16T22:51:43.693Z",
+  "expires_at": "2026-04-16T23:51:43.693Z",
   "entries": [
     {
       "issuer_id": "agent-passport-system",
@@ -237,6 +237,35 @@
       }
     },
     {
+      "issuer_id": "nobulex",
+      "display_name": "Nobulex",
+      "website": "https://nobulex.com",
+      "security_contact": "security@nobulex.com",
+      "status": "active",
+      "added_at": "2026-04-16T22:49:05.364Z",
+      "last_verified": "2026-04-16T22:49:05.364Z",
+      "public_keys": [
+        {
+          "kid": "nobulex-2026-04",
+          "algorithm": "Ed25519",
+          "public_key": "tcduFPzTSehb-PPiL78GqS34nd6bzqrbxyZvQWZluB8",
+          "status": "active",
+          "issued_at": "2026-04-16T22:49:05.364Z",
+          "expires_at": "2027-04-16T22:49:05.365Z",
+          "deprecated_at": null,
+          "revoked_at": null
+        }
+      ],
+      "capabilities": {
+        "supervision_model": "tiered",
+        "audit_logging": true,
+        "immutable_audit": false,
+        "attestation_format": "jwt",
+        "max_attestation_ttl_seconds": 3600,
+        "capabilities_verified": false
+      }
+    },
+    {
       "issuer_id": "qntm",
       "display_name": "qntm",
       "website": "https://inbox.qntm.corpo.llc",
@@ -269,6 +298,6 @@
   "signature": {
     "algorithm": "Ed25519",
     "kid": "registry-root-2026-03",
-    "value": "wBGSOIlfOZfNcqssLz3PeKp2FppJqIvfGepzC0xI8JWyd5xUXm80ZXN6obzoEq8T0jWmrlfTzv8Lfq-5fygvDg"
+    "value": "AvdQvf2by9NJZCsw_k-c0zM5zuZ2ErnyhVZFqYG1ibOdMcpwAnG4behW_Ou5DkNS5abI2G_NLiS88rb5IJYvDw"
   }
 }
