@@ -1,0 +1,33 @@
+{
+  "issuer_id": "hive-civilization",
+  "display_name": "Hive Civilization",
+  "website": "https://milkyway-terminal.onrender.com",
+  "security_contact": "srotzin@me.com",
+  "status": "active",
+  "added_at": "2026-04-22T16:32:00.000Z",
+  "last_verified": "2026-04-22T16:32:00.000Z",
+  "public_keys": [
+    {
+      "kid": "hive-civilization-2026-04",
+      "algorithm": "Ed25519",
+      "public_key": "5ErdISRDBPeexdD8ovRjgtozqilzFqcZqpyDhkGGxiQ",
+      "status": "active",
+      "issued_at": "2026-04-22T16:32:00.000Z",
+      "expires_at": "2027-04-22T16:32:00.000Z",
+      "deprecated_at": null,
+      "revoked_at": null
+    }
+  ],
+  "capabilities": {
+    "supervision_model": "tiered",
+    "audit_logging": true,
+    "immutable_audit": true,
+    "attestation_format": "smsh-v1",
+    "max_attestation_ttl_seconds": 86400,
+    "capabilities_verified": false,
+    "tier_system": "VOID->MOZ->HAWX->EMBR->SOLX->FENR",
+    "did_document_url": "https://hivegate.onrender.com/.well-known/did.json",
+    "jwks_endpoint": "https://hivegate.onrender.com/.well-known/jwks.json",
+    "agent_trust_url": "https://hivegate.onrender.com/.well-known/agent-trust.json"
+  }
+}
