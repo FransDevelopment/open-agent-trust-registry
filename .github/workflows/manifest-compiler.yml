@@ -17,6 +17,16 @@ on:
 permissions:
   contents: write
 
+# Serialize compiler runs so two invocations can't race each other when
+# the scheduled trigger and a push trigger (or two scheduled runs) overlap.
+# Without this, one run can check out commit X, start compiling, and a
+# second run can push X+1 before the first pushes, causing a non-fast-forward
+# rejection. `cancel-in-progress: false` queues rather than cancels so every
+# triggering event still produces a compile.
+concurrency:
+  group: registry-compiler
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
