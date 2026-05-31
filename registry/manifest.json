@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
   "registry_id": "open-trust-registry",
-  "generated_at": "2026-05-31T19:18:47.037Z",
-  "expires_at": "2026-05-31T20:18:47.037Z",
+  "generated_at": "2026-05-31T20:17:38.084Z",
+  "expires_at": "2026-05-31T21:17:38.084Z",
   "entries": [
     {
       "issuer_id": "agent-passport-system",
@@ -331,6 +331,6 @@
   "signature": {
     "algorithm": "Ed25519",
     "kid": "registry-root-2026-03",
-    "value": "uzRQ0ZnQu3vkI_W8JQN0bax6Dn3OwE7xy8WrUJs5d7hpFj-sHrZTW14xPxsGWd14A4CWZXxLjlt5RHyCTIXEAA"
+    "value": "qwNf2eBNRb9Rwj6EUbKrCZDM2fwR1f8t0Y9QkZkdSwmb8UGMiO5CGaZznHYW3Kj2NRcmagEbpa2VRft8ejjHCw"
   }
 }
