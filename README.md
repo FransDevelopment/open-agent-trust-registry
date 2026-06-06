@@ -266,6 +266,16 @@ SDKs in other languages are welcome as **community projects** maintained in thei
 
 > **Why not in-tree?** With a small core team, accepting additional SDKs into the main repository means every spec change has to land in every SDK before it can ship. That slows the spec down and risks SDKs drifting out of sync. Keeping community SDKs in their own repos lets them move at their own pace and makes it clear to users who maintains what. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full policy.
 
+## Related Services
+
+Services that issue cryptographic attestations or trust receipts for AI agents on-chain, complementing this registry:
+
+| Service | Chain | Attestation Type | Endpoint |
+|---------|-------|-----------------|---------|
+| **[TWZRD Agent Intel](https://intel.twzrd.xyz)** | Solana | Signed V5 x402 trust receipts for agent interactions | https://intel.twzrd.xyz/mcp |
+
+> **Note:** Listed services issue trust attestations for agent interactions but operate as independent trust layers. They are not OATR-registered issuers — they serve complementary trust use cases (e.g., payment-gated receipts vs. runtime identity attestation).
+
 ## Governance & Contributions
 
 This project is community-owned. Please see [GOVERNANCE.md](GOVERNANCE.md) to understand how decisions are made, how keys are managed, and how you can join as a maintainer.
