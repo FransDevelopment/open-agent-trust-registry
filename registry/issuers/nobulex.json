@@ -2,10 +2,10 @@
   "issuer_id": "nobulex",
   "display_name": "Nobulex",
   "website": "https://nobulex.com",
-  "security_contact": "security@nobulex.com",
+  "security_contact": "nobulex.dev@gmail.com",
   "status": "active",
   "added_at": "2026-04-16T22:49:05.364Z",
-  "last_verified": "2026-04-16T22:49:05.364Z",
+  "last_verified": "2026-06-23T00:00:00.000Z",
   "public_keys": [
     {
       "kid": "nobulex-2026-04",
@@ -19,11 +19,11 @@
     }
   ],
   "capabilities": {
-    "supervision_model": "tiered",
+    "supervision_model": "chain",
     "audit_logging": true,
-    "immutable_audit": false,
-    "attestation_format": "jwt",
-    "max_attestation_ttl_seconds": 3600,
+    "immutable_audit": true,
+    "attestation_format": "nobulex-receipt-v1",
+    "max_attestation_ttl_seconds": 86400,
     "capabilities_verified": false
   }
 }
