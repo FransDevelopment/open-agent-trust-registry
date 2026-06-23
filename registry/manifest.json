@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
   "registry_id": "open-trust-registry",
-  "generated_at": "2026-06-23T15:54:09.983Z",
-  "expires_at": "2026-06-23T16:54:09.983Z",
+  "generated_at": "2026-06-23T16:50:36.392Z",
+  "expires_at": "2026-06-23T17:50:36.392Z",
   "entries": [
     {
       "issuer_id": "agent-passport-system",
@@ -273,10 +273,10 @@
       "issuer_id": "nobulex",
       "display_name": "Nobulex",
       "website": "https://nobulex.com",
-      "security_contact": "security@nobulex.com",
+      "security_contact": "nobulex.dev@gmail.com",
       "status": "active",
       "added_at": "2026-04-16T22:49:05.364Z",
-      "last_verified": "2026-04-16T22:49:05.364Z",
+      "last_verified": "2026-06-23T00:00:00.000Z",
       "public_keys": [
         {
           "kid": "nobulex-2026-04",
@@ -290,11 +290,11 @@
         }
       ],
       "capabilities": {
-        "supervision_model": "tiered",
+        "supervision_model": "chain",
         "audit_logging": true,
-        "immutable_audit": false,
-        "attestation_format": "jwt",
-        "max_attestation_ttl_seconds": 3600,
+        "immutable_audit": true,
+        "attestation_format": "nobulex-receipt-v1",
+        "max_attestation_ttl_seconds": 86400,
         "capabilities_verified": false
       }
     },
@@ -331,6 +331,6 @@
   "signature": {
     "algorithm": "Ed25519",
     "kid": "registry-root-2026-03",
-    "value": "vFJdVwxL2bOOdwUktZwDcDoTPSIBd4aqfqZvlXM5K0bLtHG1MThPr-BlMXFaJbeDn5o9CG_or-R72wjHG7VlAg"
+    "value": "kK8IuCWguLSeOjBKVX99AMNG71RNpSAQwnijkFxVm0QCPJBeEIAfRRXrVwQuNxT66dTAv_gz7_NTZENMBbIoBA"
   }
 }
