@@ -1,0 +1,29 @@
+{
+  "issuer_id": "sint-protocol",
+  "display_name": "SINT Protocol",
+  "website": "https://sint.gg",
+  "security_contact": "pshkv@users.noreply.github.com",
+  "status": "active",
+  "added_at": "2026-04-04T13:00:00.000Z",
+  "last_verified": "2026-04-04T13:00:00.000Z",
+  "public_keys": [
+    {
+      "kid": "sint-registry-2026-04",
+      "algorithm": "Ed25519",
+      "public_key": "Yq-yYyx7sLaMHE_jmTkgYPQoSJVJMDRfdAcInJxnV0E",
+      "status": "active",
+      "issued_at": "2026-04-04T13:00:00.000Z",
+      "expires_at": "2027-04-04T13:00:00.000Z",
+      "deprecated_at": null,
+      "revoked_at": null
+    }
+  ],
+  "capabilities": {
+    "supervision_model": "tiered",
+    "audit_logging": true,
+    "immutable_audit": true,
+    "attestation_format": "sint-token-v1",
+    "max_attestation_ttl_seconds": 604800,
+    "capabilities_verified": false
+  }
+}
