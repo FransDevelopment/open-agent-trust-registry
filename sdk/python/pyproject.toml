@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "open-agent-trust"
+version = "0.1.0"
+description = "Python SDK for the Open Agent Trust Registry — verify agent attestation tokens locally"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "cryptography>=41.0",
+    "PyJWT>=2.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "hatchling"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/open_agent_trust"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
