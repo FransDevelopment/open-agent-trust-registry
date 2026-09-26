@@ -58,4 +58,4 @@ Your `capabilities` block (supervision model, audit logging, etc.) will initiall
 
 ### What Happens Next
 
-Once merged, your issuer entry will be included in the next signed `manifest.json` during the scheduled signing ceremony. See `GOVERNANCE.md` for details on the governance model.
+Once merged, your issuer entry will be included in the next signed `manifest.json`, which the registry compiler rebuilds and signs in CI automatically. See `GOVERNANCE.md` for details on the governance model.

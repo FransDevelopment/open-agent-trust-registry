@@ -98,7 +98,7 @@ Any Maintainer (including founding members) can be forcibly removed and replaced
 3. Approve revocations maliciously or without documented justification.
 4. Attempt to monetize or restrict the baseline registry infrastructure.
 
-**Replacement Process:** A public GitHub Issue is opened. If a 2/3 supermajority of the remaining Reviewer Pool votes to remove the maintainer, their commit access is revoked and their threshold key shard is cycled out.
+**Replacement Process:** A public GitHub Issue is opened. If a 2/3 supermajority of the remaining Reviewer Pool votes to remove the maintainer, their commit access is revoked and, once threshold signing is live, their threshold key shard is cycled out.
 
 ---
 

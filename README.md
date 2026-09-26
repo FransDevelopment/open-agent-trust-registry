@@ -231,7 +231,7 @@ When an AI agent shows up at an API and says "I'm acting on behalf of a user," h
 | **This Trust Registry** | "Is the agent calling me authorized by a legitimate platform?" | Maintainers under a public governance charter (single root signing key today; 3-of-5 threshold signing planned) |
 | **On-chain data** (Base) | "Has real money actually flowed through this API?" | The blockchain (immutable) |
 
-Each layer answers a different trust question. Together they form a complete trust infrastructure for the agent economy, with no central authority and every layer independently verifiable. This is what makes it possible for agents to transact with APIs they've never seen before and still know they're safe.
+Each layer answers a different trust question. Together they form a complete trust infrastructure for the agent economy, designed so that no central authority is needed and every layer is independently verifiable. This is what makes it possible for agents to transact with APIs they've never seen before and still know they're safe.
 
 ## Specifications
 
