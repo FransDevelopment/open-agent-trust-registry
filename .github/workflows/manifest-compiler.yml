@@ -2,8 +2,10 @@ name: Registry Compiler
 
 on:
   schedule:
-    # Runs every 50 minutes to comfortably beat the 60-minute expiration
-    - cron: '*/50 * * * *'
+    # Refreshes the signed artifacts (12-hour lifetime) twice an hour. GitHub drops
+    # or delays many scheduled runs, especially at the top of the hour, so the
+    # minutes are offset and the artifact lifetime carries the margin.
+    - cron: '17,47 * * * *'
   # Allows manual triggers from the GitHub Actions tab
   workflow_dispatch:
   # Runs whenever issuer or revocation data changes on the default branch

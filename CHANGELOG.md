@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Signed `manifest.json` and `revocations.json` now expire 12 hours after compilation instead of 1 and 2 hours. GitHub ran only about a quarter of the scheduled compiler runs, so the published registry was expired, and rejected by clients, most of the time. The compiler schedule moves off the top of the hour, and the mirroring spec's re-sync requirement now matches the artifact lifetime.
+
 ## [1.1.0] - 2026-03-25
 
 ### Added

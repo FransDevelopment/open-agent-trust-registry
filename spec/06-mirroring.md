@@ -9,7 +9,7 @@ By pulling and serving a signed registry, mirrors offload verification network r
 1. **Fetch:** Perform an initial clone or HTTP fetch of the complete signed registry JSON manifest (`manifest.json`) from any active mirror or directly from the primary reference server.
 2. **Verify Offline:** Mathematically verify the `manifest.json` and `revocations.json` signatures against the checked-in `root-keys.json` trust anchor.
 3. **Serve:** Expose the verified JSON state at your own URL endpoint.
-4. **Resynchronize:** Configure a CRON or automated task to re-fetch the upstream manifest files periodically. (Recommended minimum frequency: Every 15 minutes. Mandated required frequency: At least every 24 hours).
+4. **Resynchronize:** Configure a CRON or automated task to re-fetch the upstream manifest files periodically. (Recommended frequency: every 15 minutes. Required: often enough that the served `manifest.json` and `revocations.json` never pass their `expires_at`. With the current 12-hour artifact lifetime, re-fetch at least hourly.)
 
 ## Mirror Requirements
 To ensure relying services do not accept stale data that may disguise a critical runtime compromise:
