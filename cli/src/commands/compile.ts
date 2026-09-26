@@ -5,6 +5,14 @@ import { resolveActiveRootKey, signRegistryArtifact } from '../lib/registry-arti
 
 const GRACE_PERIOD_MS = 90 * 24 * 60 * 60 * 1000;
 
+// Lifetime of a signed manifest and revocation list. It must outlast the longest
+// gap between successful compiler runs plus mirror sync lag: GitHub drops or delays
+// most scheduled runs (observed p99 gap 6.4h), so a 1h lifetime left the published
+// registry expired most of the time. Both artifacts share one lifetime because
+// clients need both unexpired: availability is bounded by the shorter lifetime and
+// the freeze-attack window by the revocation list's. Spec maximum is 24h (spec/01).
+const REGISTRY_ARTIFACT_TTL_MS = 12 * 60 * 60 * 1000;
+
 function validateEntries(entries: Record<string, any>[]): number {
     let warnings = 0;
     const now = Date.now();
@@ -94,8 +102,7 @@ export async function compile(options: { privateKey: string }) {
         }
 
         const timestamp = new Date().toISOString();
-        const manifestExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-        const revocationExpiry = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+        const expiresAt = new Date(Date.now() + REGISTRY_ARTIFACT_TTL_MS).toISOString();
 
         const privateKeyPath = resolve(process.cwd(), options.privateKey);
         const privateSeed = (await readFile(privateKeyPath, 'utf8')).trim();
@@ -105,7 +112,7 @@ export async function compile(options: { privateKey: string }) {
             schema_version: '1.0.0',
             registry_id: 'open-trust-registry',
             generated_at: timestamp,
-            expires_at: manifestExpiry,
+            expires_at: expiresAt,
             entries
         };
 
@@ -119,7 +126,7 @@ export async function compile(options: { privateKey: string }) {
         const unsignedRevocations = {
             schema_version: currentRevocations.schema_version ?? '1.0.0',
             generated_at: timestamp,
-            expires_at: revocationExpiry,
+            expires_at: expiresAt,
             revoked_keys: currentRevocations.revoked_keys ?? [],
             revoked_issuers: currentRevocations.revoked_issuers ?? []
         };

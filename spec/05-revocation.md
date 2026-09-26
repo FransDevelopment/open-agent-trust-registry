@@ -7,13 +7,13 @@ The Open Agent Trust Registry operates two separate revocation tracks:
 
 ## The Revocation List
 
-While the main registry manifest (`registry.json`) is recompiled on every issuer or revocation change (and on a 50-minute cron as a safety net), the `revocations.json` file is the fast-path for emergency revocations. Changes to `revocations.json` trigger an immediate manifest recompilation on merge to main.
+While the main registry manifest (`registry.json`) is recompiled on every issuer or revocation change (and on a twice-hourly schedule that refreshes its 12-hour `expires_at`), the `revocations.json` file is the fast-path for emergency revocations. Changes to `revocations.json` trigger an immediate manifest recompilation on merge to main.
 
 ```json
 {
   "schema_version": "1.0.0",
   "generated_at": "2026-03-15T12:05:00Z",
-  "expires_at": "2026-03-15T12:10:00Z",
+  "expires_at": "2026-03-16T00:05:00Z",
   "revoked_keys": [
     {
       "issuer_id": "compromised-runtime",
