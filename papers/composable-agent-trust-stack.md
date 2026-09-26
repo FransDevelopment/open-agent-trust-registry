@@ -149,7 +149,7 @@ Registration is fully automated via CI. The verification pipeline validates the 
 
 No network calls are required during verification. The manifest is fetched and cached periodically (default: 15 minutes). All JSON is canonicalized per RFC 8785 [12] before signing. Verification targets sub-millisecond completion on commodity hardware.
 
-**Governance (Threshold-Signed).** The registry's governance charter mandates transition to 3-of-5 threshold signing using the FROST protocol [14] over Ed25519 for revocation decisions. Five master keys are to be distributed across the founding maintainer and four independent ecosystem reviewers. The design ensures that no single party, including the original author, can unilaterally revoke an issuer. All revocations require a public GitHub Issue with documented justification and one of five enumerated reasons: key compromise, issuer compromise, policy violation, voluntary withdrawal, or governance decision. This follows Shamir's foundational insight [7] that critical secrets should require threshold cooperation rather than single-party control.
+**Governance (Threshold Signing Planned).** The registry's governance charter mandates transition to 3-of-5 threshold signing using the FROST protocol [14] over Ed25519 for revocation decisions; the registry is currently signed with a single root key. Five master keys are to be distributed across the founding maintainer and four independent ecosystem reviewers. The design ensures that no single party, including the original author, can unilaterally revoke an issuer. All revocations require a public GitHub Issue with documented justification and one of five enumerated reasons: key compromise, issuer compromise, policy violation, voluntary withdrawal, or governance decision. This follows Shamir's foundational insight [7] that critical secrets should require threshold cooperation rather than single-party control.
 
 **Zero-Trust Mirrors.** The manifest is cryptographically signed. Anyone can host an exact mirror without compromising security, because a tampered manifest fails signature verification. Mirrors are zero-trust messengers: they distribute data but cannot forge it. Clients always verify signatures against the root-keys trust anchor. This design follows the zero-trust principle [13] that verification must be performed at every access point regardless of network location.
 
@@ -201,7 +201,7 @@ The architecture assumes a threat model consistent with NIST's zero-trust princi
 | Threat | Compromised Layer | Mitigation |
 |--------|-------------------|------------|
 | Rogue mirror serves tampered registry | Layer 2 (distribution) | Ed25519 signature verification against root keys [2] |
-| Compromised root signing key | Layer 2 (governance) | Threshold signing; single key insufficient [7, 14] |
+| Compromised root signing key | Layer 2 (governance) | Currently a single root key; planned 3-of-5 threshold signing so a single key is insufficient [7, 14] |
 | Malicious issuer registers and issues false attestations | Layer 2 (registration) | Permanent Git-backed audit trail, governance-backed revocation |
 | Attestation replay across services | Layer 2 (attestation) | Audience (`aud`) claim binding per service [10] |
 | Attestation replay within service | Layer 2 (attestation) | Service-provided nonce + short TTL (max 1 hour) |

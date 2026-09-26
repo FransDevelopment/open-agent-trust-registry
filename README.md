@@ -27,7 +27,7 @@ To do this, the agent presents a digital "ID badge" (called an *Attestation*). B
 
 1. **The Wax Seal (Ed25519 Cryptography):** An organization creates a Private Key (a secret, like a signet ring) and publishes their Public Key to our registry (the imprint the ring leaves in wax). When they issue an ID badge to an agent, they stamp it with their Private Key. When a website gets the badge, they look at the stamp, check our registry for the public imprint, and if they match, the badge is authentic.
 2. **Permissionless Registration:** Organizations register by cryptographically proving they own their website domain (like `my-company.com`). Our automated CI pipeline instantly adds them to the registry. No human gatekeepers, no bias.
-3. **Threshold Governance:** To prevent any single person (even the founders) from maliciously altering the registry, the master list is secured by a cryptographic lock requiring 3 out of 5 keys to open. We distribute these 5 keys to independent ecosystem leaders. Every revocation requires mathematically provable consensus.
+3. **A Signed Master List (Threshold Governance Planned):** The master list (`manifest.json`) and the revocation list are cryptographically signed, so any tampering is detectable. Today both are signed with a single registry root key (`registry-root-2026-03`, published in [`registry/root-keys.json`](registry/root-keys.json)), which our CI pipeline applies automatically. The [governance charter](GOVERNANCE.md#4-distributed-root-of-trust-threshold-signing) commits the registry to replacing that single key with a lock requiring 3 out of 5 keys, held by independent ecosystem reviewers, so that no single person (even the founders) can alter the list or revoke an issuer alone. That threshold scheme is not built yet; the proposed ceremony is described in the [draft specification](docs/multi-sig-ceremony.md).
 
 ### Zero-Trust Mirror Servers
 A core feature of the registry is that the `manifest.json` is cryptographically signed. Because of this, **anyone can host a registry mirror server without compromising security.** 
@@ -39,7 +39,7 @@ The SDK bootstraps this verification from the checked-in `root-keys.json` trust 
 ## Design Principles
 
 1. **Open from day one.** MIT or Apache 2.0 licensed. No proprietary extensions, no dual licensing, no "open core."
-2. **No single point of control.** Multiple mirrors, multi-party signing, governance designed to scale beyond founding maintainers.
+2. **No single point of control.** Multiple mirrors and governance designed to scale beyond founding maintainers. Multi-party (3-of-5 threshold) signing is planned to replace today's single root signing key.
 3. **Verify locally.** Services should never need to call a central server per-request. Download the registry, verify locally.
 4. **Small and auditable.** Hundreds to low thousands of entries. Any human can read the full registry in minutes.
 5. **Cryptographically verifiable.** Every registry state is signed. Every change is attributable. Tamper-evident by construction.
@@ -228,7 +228,7 @@ When an AI agent shows up at an API and says "I'm acting on behalf of a user," h
 |-------|---------|-----------------|
 | **[Open 402 Directory](https://github.com/ArcedeDev/open-402)** | "What paid APIs exist?" | Community (open registry) |
 | **agent.json** (on each domain) | "What can this API do?" + "Can it prove it owns this domain?" | Each API provider |
-| **This Trust Registry** | "Is the agent calling me authorized by a legitimate platform?" | Threshold governance (3-of-5 keys) |
+| **This Trust Registry** | "Is the agent calling me authorized by a legitimate platform?" | Maintainers under a public governance charter (single root signing key today; 3-of-5 threshold signing planned) |
 | **On-chain data** (Base) | "Has real money actually flowed through this API?" | The blockchain (immutable) |
 
 Each layer answers a different trust question. Together they form a complete trust infrastructure for the agent economy, with no central authority and every layer independently verifiable. This is what makes it possible for agents to transact with APIs they've never seen before and still know they're safe.
@@ -249,7 +249,7 @@ The architecture and protocols are defined in the `spec/` directory:
 - [11: Proof of Key Ownership](spec/11-proof-of-key-ownership.md)
 
 ### Draft Specifications
-- [Multi-Signature Ceremony](docs/multi-sig-ceremony.md) — 3-of-5 threshold signing (FROST) for registry governance
+- [Multi-Signature Ceremony](docs/multi-sig-ceremony.md): planned 3-of-5 threshold signing (FROST) for registry governance. Not yet implemented; the registry is currently signed with a single root key.
 
 ## SDKs
 

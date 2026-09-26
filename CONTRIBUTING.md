@@ -126,10 +126,10 @@ Agent Runtime                  Service (API)
 ```
 
 **Key design properties:**
-- **Verify locally** — services download the manifest and verify offline. No per-request calls to a central server.
-- **Zero-trust mirrors** — anyone can host a mirror. Tampered manifests are detected by signature verification.
-- **Permissionless registration** — automated CI verification, no human gatekeepers.
-- **Threshold governance** — 3-of-5 keys required to sign the manifest. No single point of control.
+- **Verify locally:** services download the manifest and verify offline. No per-request calls to a central server.
+- **Zero-trust mirrors:** anyone can host a mirror. Tampered manifests are detected by signature verification.
+- **Permissionless registration:** automated CI verification, no human gatekeepers.
+- **Threshold governance (planned):** today the manifest is signed in CI with a single registry root key. The [governance charter](GOVERNANCE.md#4-distributed-root-of-trust-threshold-signing) commits to 3-of-5 threshold signing so that no single key can sign the manifest; see the [draft ceremony specification](docs/multi-sig-ceremony.md).
 
 ## Code of Conduct
 
