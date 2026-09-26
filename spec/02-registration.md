@@ -63,7 +63,7 @@ If all three checks pass, the PR is **automatically merged**. No human approval 
 New issuers are included with `capabilities_verified: false`. Community auditors may independently review and verify capability claims in a separate PR. Inclusion in the registry never depends on this step.
 
 **Step 8 — Resign & Distribute**
-Once merged, the `registry/manifest.json` is recompiled and cryptographically signed during the next scheduled signing ceremony. Mirrors will pick up the new verified version within their standard synchronization interval.
+Once merged, the `registry/manifest.json` is recompiled and cryptographically signed by the registry compiler in CI, which runs on every merged registry change and on a schedule. (A multi-party signing ceremony is planned; see [docs/multi-sig-ceremony.md](../docs/multi-sig-ceremony.md).) Mirrors will pick up the new verified version within their standard synchronization interval.
 
 **Step 9 — Announce**
 New issuers are automatically appended to the `CHANGELOG.md` and officially announced via standard repository release mechanics.

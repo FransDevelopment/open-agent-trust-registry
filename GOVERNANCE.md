@@ -42,8 +42,10 @@ Rather than making these claims a gate on registration:
 
 Revoking an issuer is the only action that requires human consensus. Revocation requires:
 - A public GitHub Issue documenting the justification.
-- Approval from **at least 3-of-5 threshold key holders** during a signing ceremony.
+- Approval from **at least 3-of-5 threshold key holders** during a signing ceremony, once threshold signing is live (see Section 4).
 - No single maintainer can unilaterally revoke any issuer.
+
+> **Current status:** threshold signing is not yet implemented. Until it is, the revocation list is signed with the single registry root key, so the 3-of-5 approval above is a governance commitment, not a cryptographically enforced control.
 
 Revocation reasons: `key_compromise`, `issuer_compromise`, `policy_violation`, `voluntary_withdrawal`, `governance_decision`.
 
@@ -70,6 +72,8 @@ Reviewers do **not** approve or reject Tier 1 registrations. The CI pipeline han
 
 A single root signing key creates an unacceptable systemic vulnerability.
 
+**Current state:** the manifest and revocation list are signed with a single Ed25519 root key (`registry-root-2026-03`, published in `registry/root-keys.json`). The registry compiler applies it in CI whenever issuer or revocation data changes, and on a schedule to refresh expiry. No threshold scheme is in place yet.
+
 **Mandate:** By Month 6 of operation, the registry manifest `signature` infrastructure will transition to a **3-of-5 Threshold Signature scheme** (FROST over Ed25519).
 
 ### 4.1 Key Allocation
@@ -78,7 +82,7 @@ The 5 master keys will be distributed among:
 - 4 Independent Ecosystem Reviewers
 
 ### 4.2 Signing Ceremony
-Every registry state change (addition or revocation) triggers a signing ceremony. See `docs/multi-sig-ceremony.md` for the full protocol.
+Once threshold signing is live, every registry state change (addition or revocation) will trigger a signing ceremony. See the draft specification in [`docs/multi-sig-ceremony.md`](docs/multi-sig-ceremony.md) for the proposed protocol.
 
 ---
 
@@ -94,7 +98,7 @@ Any Maintainer (including founding members) can be forcibly removed and replaced
 3. Approve revocations maliciously or without documented justification.
 4. Attempt to monetize or restrict the baseline registry infrastructure.
 
-**Replacement Process:** A public GitHub Issue is opened. If a 2/3 supermajority of the remaining Reviewer Pool votes to remove the maintainer, their commit access is revoked and their threshold key shard is cycled out.
+**Replacement Process:** A public GitHub Issue is opened. If a 2/3 supermajority of the remaining Reviewer Pool votes to remove the maintainer, their commit access is revoked and, once threshold signing is live, their threshold key shard is cycled out.
 
 ---
 
@@ -103,7 +107,7 @@ Any Maintainer (including founding members) can be forcibly removed and replaced
 | Concern | How It's Addressed |
 |---------|-------------------|
 | "Can a maintainer block my registration?" | No. Tier 1 is fully automated. |
-| "Can a maintainer revoke me unilaterally?" | No. Revocation requires 3-of-5 threshold. |
+| "Can a maintainer revoke me unilaterally?" | The charter forbids it. Today that rule is procedural; once 3-of-5 threshold signing is live, it will be enforced cryptographically. |
 | "Can the founders capture the registry?" | No. Founders can be forcibly removed by 2/3 vote. |
 | "What if I disagree with my revocation?" | Public appeal process with documented justification. |
 | "Is registration free?" | Yes. Forever. (The Let's Encrypt model.) |

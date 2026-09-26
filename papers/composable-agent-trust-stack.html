@@ -276,7 +276,7 @@ Layer 1: Capability Discovery    [agent.json]
 12-14. Validate claims: audience binding, expiry, nonce.</li>
 </ol>
 <p>No network calls are required during verification. The manifest is fetched and cached periodically (default: 15 minutes). Verification completes in under 1 millisecond.</p>
-<p><strong>Governance (Threshold-Signed).</strong> The registry's governance model uses 3-of-5 threshold signing (FROST over Ed25519) for revocation decisions. Five master keys are distributed across the founding maintainer and four independent ecosystem reviewers. No single party — including the founder — can unilaterally revoke an issuer. All revocations require a public GitHub Issue with documented justification and one of five enumerated reasons: key compromise, issuer compromise, policy violation, voluntary withdrawal, or governance decision.</p>
+<p><strong>Governance (Threshold Signing Planned).</strong> The registry's governance charter mandates transition to 3-of-5 threshold signing (FROST over Ed25519) for revocation decisions; the registry is currently signed with a single root key. Five master keys are to be distributed across the founding maintainer and four independent ecosystem reviewers. The design ensures that no single party, including the founder, can unilaterally revoke an issuer. All revocations require a public GitHub Issue with documented justification and one of five enumerated reasons: key compromise, issuer compromise, policy violation, voluntary withdrawal, or governance decision.</p>
 <p><strong>Zero-Trust Mirrors.</strong> The manifest is cryptographically signed. Anyone can host an exact mirror without compromising security — a tampered manifest fails signature verification. Mirrors are zero-trust messengers: they distribute data but cannot forge it. Clients always verify signatures against the root-keys trust anchor.</p>
 <h3>4.3 Layer 3: Identity Resolution (DID Resolution v1.0)</h3>
 <p>DID Resolution v1.0 (ratified unanimously by the WG) defines how agent DIDs resolve to Ed25519 public keys. The spec requires <code>did:web</code> and <code>did:key</code> as mandatory methods, with <code>did:aps</code> and <code>did:agentid</code> as recommended extensions.</p>
@@ -324,7 +324,7 @@ Layer 1: Capability Discovery    [agent.json]
 <tr>
 <td>Compromised root signing key</td>
 <td>Layer 2 (governance)</td>
-<td>3-of-5 threshold — single key insufficient</td>
+<td>Currently a single root key; planned 3-of-5 threshold signing so a single key is insufficient</td>
 </tr>
 <tr>
 <td>Malicious issuer registers and issues false attestations</td>

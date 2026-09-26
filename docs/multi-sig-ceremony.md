@@ -1,5 +1,7 @@
 # Multi-Signature Ceremony (Draft Specification)
 
+> **Status:** not yet implemented. The registry manifest and revocation list are currently signed with a single Ed25519 root key (`registry-root-2026-03`, see [`registry/root-keys.json`](../registry/root-keys.json)). This document describes the planned replacement.
+
 Per the **Phase 5 Governance Expansion Mandate**, the Open Agent Trust Registry transitions to a **3-of-5 Threshold Signature** scheme by Month 6, distributing the root of trust among the independent Reviewer Pool.
 
 This document outlines the hypothetical ceremony operators will use to sign the `manifest.json`.
