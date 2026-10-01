@@ -61,7 +61,7 @@ Given an Ed25519 public key `ed_pk` (32 bytes, compressed Edwards point):
 x25519_pk = EdwardsToMontgomery(ed_pk)
 ```
 
-The `EdwardsToMontgomery` function converts a point from the twisted Edwards curve (Ed25519) to the equivalent point on the Montgomery curve (Curve25519). This is a deterministic, lossless mapping — the same Ed25519 key always produces the same X25519 key.
+The `EdwardsToMontgomery` function maps a valid Ed25519 point to a Montgomery u-coordinate. The conversion is deterministic, but not lossless: the Ed25519 x-coordinate sign bit is not retained. Implementations must use a validated point-conversion API, not reinterpret Ed25519 public-key bytes as X25519 bytes.
 
 **Derivation (private key):**
 
@@ -81,11 +81,10 @@ This clamping procedure is identical to libsodium's `crypto_sign_ed25519_sk_to_c
 
 | Language | Library | Function |
 |----------|---------|----------|
-| TypeScript | `@noble/curves` | `edwardsToMontgomeryPub()` |
-| Python | `cryptography` | `Ed25519PublicKey.from_public_bytes()` → `X25519PublicKey` via raw conversion |
-| Python | `PyNaCl` | `nacl.bindings.crypto_sign_ed25519_pk_to_curve25519()` |
-| Go | `filippo.io/edwards25519` | `(*Point).BytesMontgomery()` |
-| Rust | `curve25519-dalek` | `MontgomeryPoint::from()` on `EdwardsPoint` |
+| C | `libsodium` | `crypto_sign_ed25519_pk_to_curve25519()` / `crypto_sign_ed25519_sk_to_curve25519()` |
+| JavaScript | `libsodium-wrappers` | The same public-key and secret-key conversion functions, after `await sodium.ready` |
+
+See [libsodium's conversion documentation](https://libsodium.gitbook.io/doc/advanced/ed25519-curve25519). The vectors below were cross-checked with `libsodium-wrappers@0.8.4`, including conversion of both public and secret keys.
 
 #### 2.2 Key Identifier Continuity
 
@@ -95,21 +94,23 @@ The registry identifies issuer keys by `kid` (Key ID), a string identifier uniqu
 transport_kid = Trunc16(SHA-256(ed25519_pk))
 ```
 
-Where `Trunc16` takes the first 16 bytes of the SHA-256 hash. This is the same derivation used by QSP-1 for sender identification, ensuring that a single key has a single identifier across both attestation verification and encrypted transport.
+Where `Trunc16` takes the first 16 bytes of the SHA-256 hash. This is the derivation used for QSP-1 sender identification. It is distinct from the registry's free-form string `kid`.
 
-Implementations MUST verify that the `transport_kid` of a channel participant matches the `kid` of an active, non-revoked key in the registry manifest before accepting messages on the channel.
+Implementations MUST resolve the participant's `issuer_id` and registry `kid` to an active, non-revoked key, then compare `transport_kid` with `Trunc16(SHA-256(public_key_bytes))` of that key before accepting messages. Decode the registered public key before hashing; do not compare the binary fingerprint directly with the string `kid`.
 
 #### 2.3 Test Vectors — Ed25519 → X25519
 
-These vectors have been independently verified by three implementations across the Agent Identity Working Group (Python/`cryptography`, TypeScript/`@noble/curves`, Python/`PyNaCl`).
+These vectors were regenerated and cross-checked with Node.js native cryptography and `libsodium-wrappers@0.8.4`. The [SDK regression tests](../sdk/typescript/src/transport-vectors.test.ts) read this table directly and additionally check Ed25519 outputs with `@noble/ed25519`.
+
+All seeds are public, test-only fixtures. Never use these keys for a live issuer or channel.
 
 | Label | Ed25519 Seed (hex) | Ed25519 Public Key (hex) | X25519 Public Key (hex) |
 |-------|-------------------|-------------------------|------------------------|
-| All-zeros seed | `0000…0000` (32 bytes) | `3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29` | `5fdb2cef9aff23e2cd8e3f2c8ac8e4a3ade0741f96f76b700cbca7434b659d24` |
-| All-ones seed | `0101…0101` (32 bytes) | `8a558c728b9a22e11bc63ef74f682db4365e0d96db96c493328b4e37c7fc1a51` | `f30c0befc8b0e1a75d1cf83b2a26a0d3e88f00aece9cb7b45e5a9d2e89e3f26f` |
-| Counting seed | `000102…1e1f` (32 bytes) | `d75a980182b10ab7d54bfed3c964073a0ee172f3daa3f4a18446b7eb6f4a11e7` | `aa0fb77da67b7da995cf5f1a4a98b4e08b62c02f0c10c453dc0567f2e0b4f510` |
-| Random seed A | `a6d89c17fb6da9e56f368c2b562978ccd434900a835062d0fdfb5b31f0bdaaa2` | `3af2f07a6bf82ebe89be9e23d5c3efe39b8a80bf5ee9cffd8f5c3fa7a3f5fd09` | `f36b881d8cdde51be7ceb2ce03be050c7f1d8fb62c6fd4e0be8b19c4d9d5f86a` |
-| Random seed B | `99c74e4a41450c294a3ffb6473141ef3ca9e97f7afbc98ffc80f45793944dd80` | `b6c94a1c6e6ba4b5fbe06c2f893e785ac24eb6dc6d5c6037db3b42d0b4ae4f14` | `3dd82cd3d3cc787d4f8ecaa3d97b4d11a85abeff7e8d08f4e0c3c9dd67e27c28` |
+| All-zeros seed | `0000000000000000000000000000000000000000000000000000000000000000` | `3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29` | `5bf55c73b82ebe22be80f3430667af570fae2556a6415e6b30d4065300aa947d` |
+| All-ones seed | `0101010101010101010101010101010101010101010101010101010101010101` | `8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c` | `1b1b58dd50ea14b60da17b790cd02754d970c9bab864ebb3c0f3016fe51d3f57` |
+| Counting seed | `000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f` | `03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8` | `4701d08488451f545a409fb58ae3e58581ca40ac3f7f114698cd71deac73ca01` |
+| Random seed A | `a6d89c17fb6da9e56f368c2b562978ccd434900a835062d0fdfb5b31f0bdaaa2` | `a19c6c8388a53eb4a930a34bfc1908dbd1e7084a23ab6d282ae63e5708a054c8` | `b802d2a99eeec02e738f3f55cf229377dc999db020e61c6e8911d7e2194f6b75` |
+| Random seed B | `99c74e4a41450c294a3ffb6473141ef3ca9e97f7afbc98ffc80f45793944dd80` | `f988181d1aed0d4946c2a9036a98ce3df7a7afbd1593c7d079a904031af1e544` | `860b0a09f56d37a8bd5b9c5954d47628c530f00c4b7eb5cbffbbffe11a572450` |
 
 Implementers SHOULD validate their Ed25519→X25519 conversion against these vectors before deploying.
 
@@ -168,7 +169,7 @@ aead_key:      b557d6071c2237eff670aa965f8f3bb516f9ba1d788166f8faf7388f5a260ec3
 nonce_key:     d88a1a1dee9dd0761a61a228a368ad72c15b96108c04cb072cc2b8fd63056c4f
 ```
 
-These vectors have been independently verified by three implementations (Python/`cryptography`, TypeScript/`@noble/hashes`, Python/`cryptography` via AgentID bridge).
+The SDK regression tests reproduce this schedule with Node.js cryptography and `@noble/hashes`. The AEAD and nonce keys expand the derived `root` directly, without another extract step; this distinction is part of the tested schedule.
 
 #### 3.3 Registry-Bound Channel Authentication
 
@@ -190,7 +191,7 @@ After the symmetric channel is established, participants MUST authenticate their
    - **Signature check.** The inner payload signature is valid under the sender's Ed25519 key (standard QSP-1 signature verification).
    - **Registry lookup.** The `issuer_id` exists in the receiver's local registry manifest with `status: "active"`.
    - **Key match.** The sender's Ed25519 public key (from the inner payload) matches the public key associated with `kid` in the registry entry, and the key has `status: "active"`.
-   - **Transport key ID match.** `Trunc16(SHA-256(sender_ed25519_pk))` matches the `sender` field in the envelope header.
+   - **Transport key ID match.** `Trunc16(SHA-256(sender_ed25519_pk))` matches `sender_kid` in the inner payload. The registry string `kid` identifies the key resolved in the preceding check.
 
 3. If any check fails, the receiver MUST terminate the channel. No further messages are accepted.
 
@@ -369,15 +370,9 @@ This specification reuses the same Ed25519 key material for two purposes:
 
 **Analysis:**
 
-The Ed25519→X25519 derivation operates via the standard birational equivalence between the twisted Edwards and Montgomery curve forms. The signing operation (Ed25519, Edwards curve) and the key agreement operation (X25519, Montgomery curve) occur in different algebraic groups. There is no known attack that exploits simultaneous use of a key in both groups.
+Edwards and Montgomery forms are representations of birationally equivalent curves, not independent keys or security domains. Conversion support does not establish that key reuse is appropriate for every deployment. Compromise and key-lifecycle risks must be assessed across both uses; the forward-secrecy limits in §7.4 still apply.
 
-This pattern is well-established in production systems:
-
-- **Signal Protocol** derives X25519 keys from Ed25519 identity keys.
-- **libsodium** provides `crypto_sign_ed25519_pk_to_curve25519` as a first-class API.
-- **Noise Protocol Framework** (used by WireGuard, Lightning Network) supports mixed signing/DH key use.
-
-**Recommendation:** Issuers SHOULD document in their security disclosures that their Ed25519 registry keys are used for both attestation signing and encrypted transport key agreement. This is a transparency measure, not a security concern.
+**Recommendation:** Issuers SHOULD disclose the reuse of registry signing keys for transport. [Libsodium recommends distinct signing and encryption keys where feasible](https://libsodium.gitbook.io/doc/advanced/ed25519-curve25519#notes). This recommendation does not change the key-reuse schedule described here or impose a new registration requirement; designs using separate keys require an explicit identity binding and interoperability review.
 
 #### 7.2 Channel-Registry Binding
 
@@ -435,20 +430,16 @@ DID resolution is an **optional** identity layer above the transport protocol. I
 
 #### 8.2 Working Group Compatibility
 
-This specification is designed for interoperability with the QSP-1 cryptographic suite and has been informed by the Agent Identity Working Group's cross-implementation testing:
+This specification targets interoperability with the QSP-1 cryptographic suite discussed by the Agent Identity Working Group. The reproducible checks below cover key-conversion and HKDF fixture values, not complete channel establishment, relay behavior, DID resolution or authorization.
 
-- **Ed25519→X25519 derivation:** Byte-for-byte compatible across three independent implementations (Python/`cryptography`, TypeScript/`@noble/curves`, Python/`PyNaCl`).
-- **HKDF key derivation:** Identical derived keys across three implementations using the test vectors in §3.2.
-- **DID resolution:** Proven interop across three DID methods (`did:key`, `did:web`, and method-specific schemes) with 10/10 cross-checks passing.
-
-Compatible implementations include [qntm](https://github.com/corpollc/qntm) (Python/TypeScript), [Agent Passport System](https://github.com/aeoess/agent-passport-system), and [AgentID](https://github.com/haroldmalikfrimpong-ops/getagentid).
+Related implementations include [qntm](https://github.com/corpollc/qntm), [Agent Passport System](https://github.com/aeoess/agent-passport-system), and [AgentID](https://github.com/haroldmalikfrimpong-ops/getagentid). Listing them is not a certification that each implementation conforms to every requirement of this specification.
 
 #### 8.3 Test Vectors Summary
 
 | Category | Vectors | Verified By |
 |----------|---------|-------------|
-| Ed25519→X25519 derivation | 5 vectors (§2.3) | Python/`cryptography`, TypeScript/`@noble/curves`, Python/`PyNaCl` |
-| HKDF key schedule | 1 full derivation chain (§3.2) | Python/`cryptography`, TypeScript/`@noble/hashes`, Python/`cryptography` (AgentID) |
+| Ed25519→X25519 derivation | 5 vectors (§2.3) | Node.js native cryptography; libsodium public/secret conversion; Noble Ed25519 cross-check in SDK tests |
+| HKDF key schedule | 1 full derivation chain (§3.2) | Node.js cryptography and Noble HKDF in SDK tests |
 
 Implementers MUST validate against these vectors before claiming compliance with this specification.
 
