@@ -24,14 +24,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the PR head — needed to read the issuer JSON and proof files.
-      # The workflow YAML itself is from the base branch (pull_request_target
-      # guarantees this), so the PR cannot modify the verification logic.
-      - name: Checkout PR
+      # Keep the trusted base checkout. The PR is fetched as inert Git data,
+      # scope-checked, and only the allowed registry paths are materialized.
+      - name: Checkout trusted base
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+
+      - name: Fetch PR for inspection
+        run: |
+          git fetch --no-tags origin \
+            "refs/pull/${{ github.event.pull_request.number }}/head:refs/remotes/pull-request/head"
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -45,7 +48,7 @@ jobs:
       - name: Enforce file-scope restrictions
         id: scope
         run: |
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          CHANGED_FILES=$(git diff --name-only origin/main...refs/remotes/pull-request/head)
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
@@ -67,11 +70,13 @@ jobs:
             exit 1
           fi
 
+          git checkout refs/remotes/pull-request/head -- registry/issuers registry/proofs
+
       # ── Step 1: Detect new/changed issuer files ────────────────────
       - name: Detect issuer files
         id: detect
         run: |
-          ISSUER_FILES=$(git diff --name-only --diff-filter=AM origin/main...HEAD -- 'registry/issuers/*.json' | tr '\n' ' ')
+          ISSUER_FILES=$(git diff --name-only --diff-filter=AM origin/main...refs/remotes/pull-request/head -- 'registry/issuers/*.json' | tr '\n' ' ')
           echo "issuer_files=$ISSUER_FILES" >> "$GITHUB_OUTPUT"
           if [ -z "$ISSUER_FILES" ]; then
             echo "::notice::No new or modified issuer files detected."
