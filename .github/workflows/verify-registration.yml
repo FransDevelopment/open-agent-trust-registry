@@ -24,14 +24,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the PR head — needed to read the issuer JSON and proof files.
-      # The workflow YAML itself is from the base branch (pull_request_target
-      # guarantees this), so the PR cannot modify the verification logic.
-      - name: Checkout PR
+      # Keep the trusted base checkout. The PR is fetched as inert Git data,
+      # scope-checked, and only the allowed registry paths are materialized.
+      - name: Checkout trusted base
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          # No token is left in .git/config: later steps read PR-supplied
+          # files, and the GitHub API steps use the token directly.
+          persist-credentials: false
+
+      - name: Fetch PR for inspection
+        run: |
+          git fetch --no-tags origin \
+            "refs/pull/${{ github.event.pull_request.number }}/head:refs/remotes/pull-request/head"
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -44,34 +50,62 @@ jobs:
       # bundling workflow modifications into a "registration" PR.
       - name: Enforce file-scope restrictions
         id: scope
+        shell: bash
         run: |
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          set -euo pipefail
+          HEAD_REF=refs/remotes/pull-request/head
+          MERGE_BASE=$(git merge-base origin/main "$HEAD_REF")
+          # One line per change: ":oldmode newmode oldsha newsha status<TAB>path".
+          # Git C-quotes unusual paths ("..."), and a quoted path fails the
+          # name pattern below, so tabs, newlines and quotes cannot slip through.
+          RAW=$(git diff --raw --no-renames --no-abbrev "$MERGE_BASE" "$HEAD_REF")
           echo "Changed files:"
-          echo "$CHANGED_FILES"
+          printf '%s\n' "$RAW"
 
+          ISSUER_RE='^registry/issuers/[a-z0-9][a-z0-9-]*[a-z0-9]\.json$'
+          PROOF_RE='^registry/proofs/[a-z0-9][a-z0-9-]*[a-z0-9]\.proof$'
           ALLOWED=true
-          for file in $CHANGED_FILES; do
-            case "$file" in
-              registry/issuers/*.json|registry/proofs/*.proof) ;;
-              *)
-                echo "::error::PR modifies disallowed file: $file"
-                echo "::error::Auto-merge is only permitted for PRs that exclusively add issuer entries and proofs."
-                ALLOWED=false
-                ;;
-            esac
-          done
+          PATHS=()
+          while IFS=$'\t' read -r meta path; do
+            [ -n "$meta" ] || continue
+            read -r _ newmode _ _ status <<< "$meta"
+            # Names must be plain issuer ids: they are later used as file
+            # paths and in git arguments, so nothing else is accepted.
+            if ! [[ "$path" =~ $ISSUER_RE || "$path" =~ $PROOF_RE ]]; then
+              echo "::error::PR modifies disallowed file: $path"
+              ALLOWED=false
+              continue
+            fi
+            # Only added or modified regular files: no deletions (which would
+            # remove another issuer on auto-merge), symlinks or submodules.
+            if [[ "$status" != "A" && "$status" != "M" ]]; then
+              echo "::error::Only additions and modifications are auto-merged ($status: $path)"
+              ALLOWED=false
+            elif [[ "$newmode" != "100644" ]]; then
+              echo "::error::Only regular files are accepted (mode $newmode: $path)"
+              ALLOWED=false
+            else
+              PATHS+=("$path")
+            fi
+          done <<< "$RAW"
 
           echo "allowed=$ALLOWED" >> "$GITHUB_OUTPUT"
           if [ "$ALLOWED" != "true" ]; then
-            echo "::error::File-scope check failed. This PR modifies unauthorized files! Aborting workflow to prevent arbitrary code execution."
+            echo "::error::Auto-merge is only permitted for PRs that exclusively add or update issuer entries and proofs."
+            echo "::error::File-scope check failed. Aborting workflow to prevent arbitrary code execution."
             exit 1
+          fi
+
+          # Materialize exactly the validated files from the PR head.
+          if [ "${#PATHS[@]}" -gt 0 ]; then
+            git checkout "$HEAD_REF" -- "${PATHS[@]}"
           fi
 
       # ── Step 1: Detect new/changed issuer files ────────────────────
       - name: Detect issuer files
         id: detect
         run: |
-          ISSUER_FILES=$(git diff --name-only --diff-filter=AM origin/main...HEAD -- 'registry/issuers/*.json' | tr '\n' ' ')
+          ISSUER_FILES=$(git diff --name-only --diff-filter=AM origin/main...refs/remotes/pull-request/head -- 'registry/issuers/*.json' | tr '\n' ' ')
           echo "issuer_files=$ISSUER_FILES" >> "$GITHUB_OUTPUT"
           if [ -z "$ISSUER_FILES" ]; then
             echo "::notice::No new or modified issuer files detected."
@@ -148,9 +182,12 @@ jobs:
                 // changing the `website` or `issuer_id` to prevent domain hijack takeovers.
                 let baseIssuer = null;
                 try {
-                  const execSync = require('child_process').execSync;
-                  // Pull from the checkout's FETCH_HEAD or origin/main
-                  const baseRaw = execSync(`git show origin/main:${file} 2>/dev/null`).toString();
+                  const { execFileSync } = require('child_process');
+                  // Read the base version without a shell, so a file name can
+                  // never be interpreted as a command.
+                  const baseRaw = execFileSync('git', ['show', `origin/main:${file}`], {
+                    stdio: ['ignore', 'pipe', 'ignore'],
+                  }).toString();
                   if (baseRaw) {
                     baseIssuer = JSON.parse(baseRaw);
                   }
