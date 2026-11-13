@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
   "registry_id": "open-trust-registry",
-  "generated_at": "2026-11-13T10:59:05.631Z",
-  "expires_at": "2026-11-13T22:59:05.631Z",
+  "generated_at": "2026-11-13T15:48:44.782Z",
+  "expires_at": "2026-11-14T03:48:44.782Z",
   "entries": [
     {
       "issuer_id": "agent-passport-system",
@@ -326,11 +326,40 @@
         "max_attestation_ttl_seconds": 604800,
         "capabilities_verified": false
       }
+    },
+    {
+      "issuer_id": "sint-protocol",
+      "display_name": "SINT Protocol",
+      "website": "https://sint-ai.github.io/sint-protocol",
+      "security_contact": "pshkv@users.noreply.github.com",
+      "status": "active",
+      "added_at": "2026-04-04T13:00:00.000Z",
+      "last_verified": "2026-04-04T13:00:00.000Z",
+      "public_keys": [
+        {
+          "kid": "sint-registry-2026-04",
+          "algorithm": "Ed25519",
+          "public_key": "Yq-yYyx7sLaMHE_jmTkgYPQoSJVJMDRfdAcInJxnV0E",
+          "status": "active",
+          "issued_at": "2026-04-04T13:00:00.000Z",
+          "expires_at": "2027-04-04T13:00:00.000Z",
+          "deprecated_at": null,
+          "revoked_at": null
+        }
+      ],
+      "capabilities": {
+        "supervision_model": "tiered",
+        "audit_logging": true,
+        "immutable_audit": true,
+        "attestation_format": "sint-token-v1",
+        "max_attestation_ttl_seconds": 604800,
+        "capabilities_verified": false
+      }
     }
   ],
   "signature": {
     "algorithm": "Ed25519",
     "kid": "registry-root-2026-03",
-    "value": "3iRyghQQ425CWsBNnPIyXu7CoLcIxJwKQVgiGW6NzesyEObG0MI7jdDR4M3_zjY23qugk0r3SU0MHvDzNPvRAg"
+    "value": "BqPXcZhsx0jorvnsUkpGaWiDi1u6apE3KmxYQ7q7h7tV81non6fRb3b7wymnHKeTS_Qivsrc2s4hw7Kf-5oUCg"
   }
 }
